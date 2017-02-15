@@ -3,8 +3,7 @@
 Ensight4Matlab let's you read, process, and write files in EnSight Case Gold format from your C++ or MATLAB&reg; code.
 
 <img align="right" src="images/ensightviewer_velocity_small.png">
-The Ensight format is used to save CFD and CAE data and widely supported by many software tools. The format is
-specified by CEI software, Inc., see http://www.ceisoftware.com for more details.
+The Ensight Gold format represents a 3D mesh and variable fields defined over the domain of this mesh. The mesh and/or variables may be either static in time or time-varying. The Ensight Gold format is used to save e.g. CFD and CAE data, and widely supported by many software tools. It is specified by CEI software, Inc., see http://www.ceisoftware.com for more details.
 This packages provides a C++ based library which you can directly link (statically or dynamically) to your application. Additionally, it provides a language binding for MATLAB to easily use the C++ library in your MATLAB scripts.
 
 
@@ -13,11 +12,13 @@ Table of Contents
 
   * [Installation](#installation)
     * [Requirements](#requirements)
-    * [Compiling the EnsightLib C++ library](#building-the-ensightlib-c-library)
-    * [Compiling the MATLAB interface](#building-the-matlab-interface)
-  * [Example usage](#example-usage)
+    * [Building the EnsightLib C++ library](#building-the-ensightlib-c-library)
+    * [Building the MATLAB interface](#building-the-matlab-interface)
+  * [Usage](#usage)
+    * [Overview](#overview)
     * [C++ Example](#c-example)
     * [MATLAB Example](#matlab-example)
+    * [Point location and variable interpolation](#point-location-and-variable-interpolation)
   * [License](#license)
   * [Contributors](#contributors)
 
@@ -72,19 +73,37 @@ This needs to be set before you start MATLAB.
 Building the MATLAB interface is aided by two scripts: `SETUP.m` and `runmex.m`. In MATLAB, navigate to the `EnsightMatlab` directory containing these scripts, then run `SETUP` first followed by `runmex`.
 
 The SETUP script will ask you to specify several include and library paths. These paths refer to:
- * QT_INCLUDE_PATH: The include files for Qt, e.g. `/usr/include`
- * QT_LIB_PATH: The Qt libraries, e.g. `/usr/lib64`
- * EIGEN_PATH: The Eigen library. Same as used in your EnsightLib.pro
- * ENSIGHT_INCLUDE_PATH: The includes for the EnsightLib library, e.g. `../ensight_lib/include`
- * ENSIGHT_LIB_PATH: The path to your compiled EnsightLib library, same as specified in `LD_LIBRARY_PATH` above
+  * QT_INCLUDE_PATH: The include files for Qt, e.g. `/usr/include`
+  * QT_LIB_PATH: The Qt libraries, e.g. `/usr/lib64`
+  * EIGEN_PATH: The Eigen library. Same as used in your EnsightLib.pro
+  * ENSIGHT_INCLUDE_PATH: The includes for the EnsightLib library, e.g. `../ensight_lib/include`
+  * ENSIGHT_LIB_PATH: The path to your compiled EnsightLib library, same as specified in `LD_LIBRARY_PATH` above
 
-Once you have specified these paths, call `runmex` to start the MEX compiler. If everything works, you get the message `MEX completed successfully.` Now run the examples to test the installation.
+Once you have specified these paths, call `runmex` to start the MEX compiler. If everything works, you get the message
+```
+MEX completed successfully.
+```
+Now run the examples to test the installation.
 
-Example usage
-=============
+Usage
+=====
 
-This package comes with a full [C++ application example](#c-example) and two [MATLAB scripts](#matlab-example) to demonstrate the usage of the library. For further details you can read the Doxygen documentation for the C++ library. The Matlab interface provides a list of available methods by typing `methods EnsightLib`, and help on the individual methods with `help EnsightLib.METHOD`, where METHOD is any of the listed methods.
+This package comes with a full [C++ application example](#c-example) and two [MATLAB scripts](#matlab-example) to demonstrate the usage of the library. For further details you can read the Doxygen documentation for the C++ library. The Matlab interface provides a list of available methods by typing `methods EnsightLib`, and help on the individual methods with `help EnsightLib.METHOD`, where _METHOD_ is any of the listed methods.
 
+Overview
+--------
+A data set in EnSight Case Gold format describes 3D data. This data can either be _static_ or _transient_, i.e. time-varying. The data consists of geometry, represented as an unstructured mesh, and optionally variables defined over the domain of the mesh, as well as constants. The mesh's domain is partitioned into one _parts_. Variables can either be scalar or vector valued. For instance, the example data set `data/jet.encas` contains the variables _temperature_ and _velocity_, meaning each vertex of the mesh has a scalar temperature value and a 3D velocity vector.
+
+The mesh is represented as follows: For each time step, the mesh consists of
+ * A list of 3D vertex coordinates
+ * A list of parts. In turn, each part contains lists of cells of different types, e.g. triangles, quadrangles, tetrahedra etc. Each cell is represented by indices into the coordinate list. For a complete list of available cell types see Figure 9-1 on page 9-6 of the [Ensight User Manual](http://www3.ensight.com/EnSight10_Docs/UserManual.pdf#page=632).
+
+Note: The EnSight Gold specification also allows structured grids. However, this functionality is not yet implemented.
+
+On the filesystem, a data set consists of several files:
+  * A _case_ file: This is the main file of the data set and describes its structure. It also contains the names of additional files. Suffix is usually `.case` or `.encas`
+  * One or more geometry files: Contains data of the mesh (vertex coordinates and connectivity) for each part and time step. Suffix is usually `.geo` or `.geom`
+  * Optionally: one or more files for each variable
 
 C++ Example
 -----------
@@ -93,7 +112,7 @@ The directory `ensight_lib/examples/ensight_viewer` contains a demo application 
 
 Unpack the example data in `data/jet.tar.bz2` and load it in the viewer demo. You can see that the data consists of a several named parts, containing different types of cells (quadrangles, hexahedra), and several variables such as "temperature" and "velocity".
 
-![Image description](images/ensightviewer_scr1.png)
+![Screenshot of Ensight Viewer Demo](images/ensightviewer_scr1.png)
 <div align=center>Figure 1: The Ensight Viewer demo shows the structure of the example data file (left) and a visualization of the "velocity" variable of all parts selected as "active" (right).</div>
 <div align=center>
 <img src="images/ensightviewer_temperature_wire.png"><br>
@@ -110,8 +129,8 @@ Basic usage is as follows:
 
 A complete data set in Ensight format is represented by an Object of class `EnsightObj`. You can create a new (empty) object by using the default constructor, or load an existing file using:
 ```c++
-std::string fileName = "data/exampleData.case";
-auto ensObject = EnsightLib::readEnsight();
+std::string fileName = "data/jet.case";
+auto ensObject = EnsightLib::readEnsight(fileName);
 ```
 Similiarly, you can then use
 ```c++
@@ -120,14 +139,29 @@ int timestepsToWrite = -1; // write all timesteps
 EnsightLib::writeEnsight(ensObject, fileName, writeBinaryMode, timestepsToWrite);
 ```
 to save the data to disk. Here, you can specify two additional parameters:
- * the parameter `writeBinaryMode` specifies whether the file is written as Ensight Binary format or as Ensight Ascii format.
- * for data sets containing multiple time steps, the `timestepsToWrite` parameter lets you save only a certain timestep, whereas passing -1 writes the complete data set. This is useful if your program generates data for time steps sequentially and you want to save only the new data as it is generated.
+  * the parameter `writeBinaryMode` specifies whether the file is written as Ensight Binary format or as Ensight Ascii format.
+  * for data sets containing multiple time steps, the `timestepsToWrite` parameter lets you save only a certain timestep, whereas passing -1 writes the complete data set. This is useful if your program generates data for time steps sequentially and you want to save only the new data as it is generated.
 
+An object of class `EnsightObj` then provides access to the complete structure of the data set:
+   * query the number of time steps (with method `getNumberOfTimesteps`), parts (`getNumberOfParts`), variables (`getNumberOfVariables`), and constants (`getNumberOfConstants`)
+   * access a part for a given time step: `getPart` returns a pointer of type `EnsightPart`
+     * `EnsightPart` gives access to the vertex coordinates, cell indices, and variable values of a part with `getVertices`, `getCells`, and `getVariables`, respectively
+   * access values of constants with `getConstant`
+   *  interpolate variable values for 3D point positions with `interpolate` (see [below](#point-location-and-variable-interpolation))
 
+To change the data represented by the EnsightObj, you first have to call `beginEdit` to enter _edit mode_. You can then create new time steps, parts, variables, etc. and set vertex coordinates, cell indices and variable values. Once you are finished, call `endEdit` to leave edit mode. This will then run a few checks to test if the data is consistent and fail if any inconsistencies are found.
+   
 MATLAB Example
 --------------
 
 Description of MATLAB example...
+
+
+Point location and variable interpolation
+-----------------------------------------
+Two common tasks are, for a given point **x**, to locate which cell of the mesh contains **x** or to interpolate variable values given at the cell vertices to a value at **x**. While not directly related to the Ensight format, this package provides this functionality for convenience.
+
+Description of point location using spatial search (Octree/Quadtree) and interpolation using barycentric coordinates...
 
 License
 =======
