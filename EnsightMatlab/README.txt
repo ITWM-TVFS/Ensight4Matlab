@@ -12,7 +12,7 @@ INSTRUCTIONS :
  
 >> IMPORTANT: The system needs to access  compiled versions of 
 	- Qt
-        - gcc
+    - gcc
 	- EnsightLib
    If you have compiled the C++ EnsightLib library locally and have not
    installed it globally, you need to ensure it can be found by MATLAB by
