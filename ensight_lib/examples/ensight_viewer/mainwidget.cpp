@@ -187,8 +187,13 @@ void MainWidget::fillTable()
         }
     }
 
+#if QT_VERSION >= 0x050000
+    ui->table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+#else
     ui->table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     ui->table->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+#endif
 }
 
 const QString MainWidget::boundsToString(const Bbox & bounds, int dim) const

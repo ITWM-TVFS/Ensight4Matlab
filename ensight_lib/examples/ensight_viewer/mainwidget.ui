@@ -140,9 +140,6 @@
         <pointsize>8</pointsize>
        </font>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::Panel</enum>
-      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
