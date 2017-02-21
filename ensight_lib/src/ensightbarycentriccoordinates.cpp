@@ -382,16 +382,21 @@ void EnsightBarycentricCoordinates::computeTriCell(const Vec3 &pos, const Ensigh
     Vec3 b = cell->getVertex(iNodes(iLocalSubNodes(1)));
     Vec3 c = cell->getVertex(iNodes(iLocalSubNodes(2)));
 
-    Vec3 v0 = pos - c;
-    Vec3 v1 = a - c;
-    Vec3 v2 = b - c;
+    Vec3 v0 = b - a;
+    Vec3 v1 = c - a;
+    Vec3 v2 = pos - a;
 
-    double det = v2(1)*v1(0) - v2(0)*v1(1);
+    double d00 = v0.dot(v0);
+    double d01 = v0.dot(v1);
+    double d11 = v1.dot(v1);
+    double d20 = v2.dot(v0);
+    double d21 = v2.dot(v1);
+    double denom = d00 * d11 - d01 * d01;
 
-    baryCoords_(iLocalSubNodes(0)) =  (v2(1)*v0(0) - v2(0)*v0(1)) / det;
-    baryCoords_(iLocalSubNodes(1)) =  (v1(0)*v0(1) - v1(1)*v0(0))/ det;
-    baryCoords_(iLocalSubNodes(2)) = 1.0 - baryCoords_(iLocalSubNodes(0))
-                                         - baryCoords_(iLocalSubNodes(1));
+    baryCoords_(iLocalSubNodes(1)) = (d11 * d20 - d01 * d21) / denom;
+    baryCoords_(iLocalSubNodes(2)) = (d00 * d21 - d01 * d20) / denom;
+    baryCoords_(iLocalSubNodes(0)) = 1.0 - baryCoords_(iLocalSubNodes(1))
+                                         - baryCoords_(iLocalSubNodes(2));
 }
 
 void EnsightBarycentricCoordinates::computeQuadCell(const Vec3 &pos, const EnsightCellIdentifier *cell, Veci &iLocalSubNodes)
