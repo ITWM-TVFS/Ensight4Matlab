@@ -41,7 +41,7 @@ public:
     EnsightSubdivTree();
     virtual ~EnsightSubdivTree() = 0;
 
-    EnsightCellIdentifier* search(const Vec3& pos);
+    EnsightCellIdentifier* search(const Vec3& pos) const;
     virtual EnsightCellIdentifier* search(const Vec3& pos,
                                           EnsightBarycentricCoordinates& baryCoordout) const = 0;
     virtual QList<EnsightCellIdentifier*> searchAll(const Vec3& pos) const = 0;

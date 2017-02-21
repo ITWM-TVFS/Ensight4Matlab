@@ -36,7 +36,7 @@ EnsightSubdivTree::EnsightSubdivTree() = default;
 EnsightSubdivTree::~EnsightSubdivTree() = default;
 
 
-EnsightCellIdentifier* EnsightSubdivTree::search(const Vec3 &pos)
+EnsightCellIdentifier* EnsightSubdivTree::search(const Vec3 &pos) const
 {
     EnsightBarycentricCoordinates baryCoords;
     return search(pos, baryCoords);
