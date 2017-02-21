@@ -3,7 +3,7 @@
 Ensight4Matlab let's you read, process, and write files in EnSight Case Gold format from your C++ or MATLAB&reg; code.
 
 <img align="right" src="images/ensightviewer_velocity_small.png">
-The Ensight Gold format represents a 3D mesh and variable fields defined over the domain of this mesh. The mesh and/or variables may be either static in time or time-varying. The Ensight Gold format is used to save e.g. CFD and CAE data, and widely supported by many software tools. It is specified by CEI software, Inc., see http://www.ceisoftware.com for more details.
+The Ensight Gold format represents a 3D mesh and variable fields defined over the domain of this mesh. The mesh and/or variables may be either static in time or time-varying. The Ensight Gold format is used to save e.g. CFD and CAE data, and widely supported by many software tools. It is specified by CEI software, Inc., see http://www.ceisoftware.com for more details.<br>
 This packages provides a C++ based library which you can directly link (statically or dynamically) to your application. Additionally, it provides a language binding for MATLAB to easily use the C++ library in your MATLAB scripts.
 
 
@@ -16,8 +16,8 @@ Table of Contents
     * [Building the MATLAB interface](#building-the-matlab-interface)
   * [Usage](#usage)
     * [Overview](#overview)
-    * [C++ Example](#c-example)
-    * [MATLAB Example](#matlab-example)
+    * [C++ Usage](#c-usage)
+    * [MATLAB Usage](#matlab-usage)
     * [Point location and variable interpolation](#point-location-and-variable-interpolation)
   * [License](#license)
   * [Contributors](#contributors)
@@ -36,7 +36,7 @@ The C++ library has dependencies on the following third party libraries:
   * Qt, either version 4 or 5.
 
   For use with MATLAB, Qt 4 is recommended. (see below)
-  * OpenGL is needed for the [example application](#c-example).
+  * OpenGL is needed for the [example application](#c-usage).
 
 The MATLAB wrapper depends on a compiled version of the C++ library and needs the MEX compiler to compile the MATLAB/C++ interface.
 
@@ -83,16 +83,16 @@ Once you have specified these paths, call `runmex` to start the MEX compiler. If
 ```
 MEX completed successfully.
 ```
-Now run the examples to test the installation.
+You should also add the `EnsightMatlab` directory to your [MATLAB search path](https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html) to ensure MATLAB can find it irrespective of the current working directoy. Now run the examples to test the installation.
 
 Usage
 =====
 
-This package comes with a full [C++ application example](#c-example) and two [MATLAB scripts](#matlab-example) to demonstrate the usage of the library. For further details you can read the Doxygen documentation for the C++ library. The Matlab interface provides a list of available methods by typing `methods EnsightLib`, and help on the individual methods with `help EnsightLib.METHOD`, where _METHOD_ is any of the listed methods.
+This package comes with a full [C++ application example](#c-usage) and two [MATLAB scripts](#matlab-usage) to demonstrate the usage of the library. For further details you can read the Doxygen documentation for the C++ library. The Matlab interface provides a list of available methods by typing `methods EnsightLib`, and help on the individual methods with `help EnsightLib.METHOD`, where _METHOD_ is any of the listed methods.
 
 Overview
 --------
-A data set in EnSight Case Gold format describes 3D data. This data can either be _static_ or _transient_, i.e. time-varying. The data consists of geometry, represented as an unstructured mesh, and optionally variables defined over the domain of the mesh, as well as constants. The mesh's domain is partitioned into one _parts_. Variables can either be scalar or vector valued. For instance, the example data set `data/jet.encas` contains the variables _temperature_ and _velocity_, meaning each vertex of the mesh has a scalar temperature value and a 3D velocity vector.
+A data set in EnSight Case Gold format describes 3D data. This data can either be _static_ or _transient_, i.e. time-varying. The data consists of mesh geometry, represented as an unstructured grid, and optionally variables defined over the domain of the mesh, as well as constants. The mesh's domain is partitioned into one _parts_. Variables can either be scalar or vector valued. For instance, the example data set `data/jet.encas` contains the variables _temperature_ and _velocity_, meaning each vertex of the mesh has a scalar temperature value and a 3D velocity vector.
 
 The mesh is represented as follows: For each time step, the mesh consists of
  * A list of 3D vertex coordinates
@@ -105,8 +105,8 @@ On the filesystem, a data set consists of several files:
   * One or more geometry files: Contains data of the mesh (vertex coordinates and connectivity) for each part and time step. Suffix is usually `.geo` or `.geom`
   * Optionally: one or more files for each variable
 
-C++ Example
------------
+C++ Usage
+---------
 
 The directory `ensight_lib/examples/ensight_viewer` contains a demo application for the C++ library. This application is a simple OpenGL-based viewer for EnSight files. It is build using the qmake build process the same way as the EnsightLib library, see build instructions [build instructions above](#building-the-ensightlib-c-library).
 
@@ -129,7 +129,7 @@ Basic usage is as follows:
 
 A complete data set in Ensight format is represented by an Object of class `EnsightObj`. You can create a new (empty) object by using the default constructor, or load an existing file using:
 ```c++
-std::string fileName = "data/jet.case";
+std::string fileName = "data/jet.encas";
 auto ensObject = EnsightLib::readEnsight(fileName);
 ```
 Similiarly, you can then use
@@ -151,17 +151,74 @@ An object of class `EnsightObj` then provides access to the complete structure o
 
 To change the data represented by the EnsightObj, you first have to call `beginEdit` to enter _edit mode_. You can then create new time steps, parts, variables, etc. and set vertex coordinates, cell indices and variable values. Once you are finished, call `endEdit` to leave edit mode. This will then run a few checks to test if the data is consistent and fail if any inconsistencies are found.
    
-MATLAB Example
---------------
+MATLAB Usage
+------------
 
-Description of MATLAB example...
+Once you have installed the Matlab interface and added it to your search path, you can access it by using the class `EnsightLib`. Constructing an object of this class without any parameters creates an empty data set:
+```
+>> newData = EnsightLib;
+```
+To load an existing file, pass the file name as argument:
+```
+>> jet = EnsightLib('data/jet.encas')
+
+jet = 
+
+  EnsightLib with properties:
+
+              timeSteps: 0
+               editMode: 0
+        EnsightPartList: {13×2 cell}
+      EnsightSubdivTree: [1×1 struct]
+    EnsightVariableList: {6×3 cell}
+              Constants: {0×2 cell}
+```
+The command `methods EnsightLib` gives an overview of available methods. Use `help` to get more information on individual methods. The directory `EnsightMatlab/examples` contains two examples showing how to:
+ - Create a new object
+ - Create parts
+ - Add vertices, cells, and variables
+ - Save the resulting object
+ - Use `search` to query a point and `interpolateVariable` for interpolation (see below).
 
 
 Point location and variable interpolation
 -----------------------------------------
 Two common tasks are, for a given point **x**, to locate which cell of the mesh contains **x** or to interpolate variable values given at the cell vertices to a value at **x**. While not directly related to the Ensight format, this package provides this functionality for convenience.
 
-Description of point location using spatial search (Octree/Quadtree) and interpolation using barycentric coordinates...
+To achieve fast cell lookup, the cells of the mesh can be sorted into a spatial subdivision data structure. The implementation either uses an Octree for 3D data or a Quadtree for 2D data in the Z=0 plane. Given a point **x**, we can then use this subdivision to find the cell containing this point.
+
+For convenience, the Matlab interface automatically creates the octree when needed. Using the C++ side, the octree needs to be explicitly created before it can be used to query point locations. For example:
+```c++
+EnsightObj* ensObj = ...
+int maxDepth = 7;            // tree is at most 7 levels deep
+int maxCellsPerLevel = 50;   // For levels < 7, subdivide after 50 cells
+QStringList partsToExclude;  // empty list, don't exclude any parts
+ensObject->createSubdivTree(maxDepth, maxCellsPerLevel, partsToExclude);
+```
+Cell lookup can then be achieved by either
+```c++
+Vec3 x(0, 0, 0); // example coordinates to query
+auto* cell = ensObj->interpolate(x);
+```
+or alternatively
+```c++
+EnsightBarycentricCoordinates baryCoords;  // output parameter for point coords
+auto* cell = ensObj->interpolate(x, baryCoords);
+```
+The latter call also computes the [barycentric coordinates](https://en.wikipedia.org/wiki/Barycentric_coordinate_system) of the query point with respect to the located cell. 
+
+The barycentric coordinates can be used for interpolation of variable values: Variables defined over a cell are given by their values at cell vertices. By computing a weighted sum of vertex values, we get a linear interpolation. That is, given values _v_<sub>_i_</sub> at vertex _i_, and corresponding coordinates _b_<sub>_i_</sub>, we get the interpolated value _w_ as the scalar product _w_ = \<_v_, _b_\>.
+
+The Matlab interface comes with a convenience method that does all of this in one call: It creates the spatial subdivision data structure (if it doesn't already exist), does cell lookup, and interpolates a given variable using the resulting barycentric coordinates for a query point:
+```
+>> jet = EnsightLib('data/jet.encas');
+>> t = jet.interpolateVariable([0, 0, 0]', 'temperature')
+
+t =
+
+  301.5740
+```
+
 
 License
 =======
