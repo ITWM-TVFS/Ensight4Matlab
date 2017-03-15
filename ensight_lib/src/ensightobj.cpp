@@ -492,7 +492,8 @@ Matx EnsightObj::getVariableBounds(const std::string &name, int timestep) const
 }
 
 bool EnsightObj::createSubdivTree(int maxDepth, int maxElements,
-                              const QStringList& partsToExclude, double sizeOffset)
+                                  const QStringList& partsToExclude,
+                                  double sizeOffset)
 {
     // TODO: for the moment only static data supported
     // Later one Octree for each timestep !?
@@ -501,10 +502,10 @@ bool EnsightObj::createSubdivTree(int maxDepth, int maxElements,
     Bbox bounds = getGeometryBounds(-1, partsToExclude);
     double zlen = fabs(bounds.maxCorner()[2] - bounds.minCorner()[2]);
     if (zlen <= std::numeric_limits<double>::epsilon())
-        //Create quadtree
+        // create quadtree
         subdivTree_.reset(new EnsightQuadtree(bounds, maxDepth, maxElements));
     else
-        //Create octree
+        // create octree
         subdivTree_.reset(new EnsightOctree(bounds, maxDepth, maxElements));
     for (int i = 0; i < getNumberOfParts(); i++)
     {
@@ -604,7 +605,7 @@ bool EnsightObj::setVariable(EnsightPart* part, const QString& name, const Matx&
     if (Ensight::varTypeDims[static_cast<int>(type)] != values.rows())
     {
         EnsightObj::ERROR_STR = "Cannot add Variable " + name + "to Part " + part->getName() +
-                                QString(". %0 varlues per node expected")
+                                QString(". %0 values per node expected")
                                 .arg(Ensight::varTypeDims[static_cast<int>(type)]);
         return false;
     }

@@ -29,8 +29,8 @@
 #include "../include/ensightdef.h"
 
 class EnsightObj;
+class QFile;
 class QString;
-
 
 
 namespace Ensight
@@ -44,27 +44,36 @@ namespace detail
  * @brief Read an Ensight Geometry file from filename.
  * @param ensight The ensight file the loaded geometry is added to
  * @param filename The filename of the Geometry file
- * @param timestep
- * @return false in case of any errors, otherwise true
+ * @param timestep The current timestep in the Ensight object
+ * @param readTimeStep The timestep to read from file (-1 for all)
+ * @param isTransientSingleFile file is in transient single file format
+ * @return false in case of errors, otherwise true
  */
-bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timestep);
-
-bool readAsciiGeometry(EnsightObj& ensight, const std::string& filename, int timestep);
+bool readAsciiGeometry(EnsightObj& ensight, const QString& filename,
+                       int timestep, int readTimeStep,
+                       bool isTransientSingleFile);
+bool readAsciiGeometryTimeStep(EnsightObj& ensight, QFile& file, int timestep);
 
 /**
  * @brief Read an Ensight Variable file, MUST be scalar per node or vector per node
  * @param ensight The Ensight object the variable is added to
  * @param filename The filename to read from
  * @param name The name of the variable
- * @param timestep The timestep of the readed file
+ * @param timestep The current timestep in the Ensight object
+ * @param readTimeStep The timestep to read from file (-1 for all)
+ * @param isTransientSingleFile file is in transient single file format
  * @param type The type of the variable
  * @param dim The dimension of the variable
- * @return  false in case of any errors, otherwise true
+ * @return false in case of errors, otherwise true
  *
  */
 bool readAsciiVariable(EnsightObj& ensight, const QString& filename,
-                       const QString& name, int timestep,
-                        Ensight::VarTypes type, int dim);
+                       const QString& name, int timestep, int readTimeStep,
+                       bool isTransientSingleFile, Ensight::VarTypes type,
+                       int dim);
+bool readAsciiVariableTimeStep(EnsightObj& ensight, QFile& file,
+                               const QString& name, int timestep,
+                               Ensight::VarTypes type, int dim);
 }
 }
 }

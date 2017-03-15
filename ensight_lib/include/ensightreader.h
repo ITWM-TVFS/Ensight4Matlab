@@ -43,18 +43,24 @@ public:
     EnsightCase(const std::string& fileName);
 
     bool readCaseFile();
-    void print() const;
     void setMasterFileName(const QString& fileName);
     void setMasterFileName(const std::string& fileName);
 
+    int getFileNumberForStep(int step) const;
+
+    // Case file name
     QString masterFileName;
+
+    // model (geometry)
     QString modelFilename;
     int modelTimeset;
+    int modelFileSet;
 
     // filenames and timesets of all variables
     QStringList variableNames;
     QStringList variableFilenames;
-    QList<int> variableTimesets;
+    QList<int> variableTimeSets;
+    QList<int> variableFileSets;
     QList<Ensight::VarTypes> variableTypes;
 
     // names and values of all constants
@@ -67,6 +73,10 @@ public:
     int timesetFilenameStart;
     int timesetFilenameIncrement;
     Vecx timesteps;
+
+    // file set values
+    int filesetId;
+    int filesetSteps;
 };
 
 /**
@@ -115,20 +125,27 @@ namespace detail
 
 
     /**
-     * @brief Checks if the specified filename has a correct definition of wildcards and if enough wildcards are available for timestep.
+     * @brief Checks if the specified filename has a correct definition of
+     * wildcards and if enough wildcards are available for timestep.
      * @param filename
      * @param timestep
      */
     bool checkWildcards(const QString& filename, int timestep);
 
     bool readSectionFormat(QStringList& data);
-    bool readSectionGeometry(QStringList& data, QString& modelFilename, int& modelTimeset);
+    bool readSectionGeometry(QStringList& data, QString& modelFilename,
+                             int& modelTimeset, int& modelFileSet);
     bool readSectionVariables(QStringList& data, QStringList& variableNames,
-                              QStringList& variableFilenames, QList<int>& variableTimesets,
+                              QStringList& variableFileNames,
+                              QList<int>& variableTimeSets,
+                              QList<int>& variableFileSets,
                               QList<Ensight::VarTypes>& variableTypes,
-                              QStringList& constantsNames, QList<double>& constantsValues);
-    bool readSectionTimeset(QStringList& data, int& timesetId, int& timesetSteps,
-                            int& timesetFilenameStart, int& timesetFilenameIncrement, Vecx& timesteps);
+                              QStringList& constantsNames,
+                              QList<double>& constantsValues);
+    bool readSectionTime(QStringList& data, int& timesetId, int& timesetSteps,
+                         int& timesetFilenameStart, int& timesetFilenameIncrement,
+                         Vecx& timesteps);
+    bool readSectionFile(QStringList& data, int& filesetId, int &filesetSteps);
     Ensight::Section getSection(const QString& line);
     Ensight::VarTypes getVarType(const QString& line);
 } // namespace detail

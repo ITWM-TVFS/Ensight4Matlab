@@ -59,7 +59,8 @@ bool parseAsciiHeader(QFile& file, IdMode& nodeIds, IdMode& elementIds)
     return success;
 }
 
-bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timestep)
+bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timestep,
+                       int readTimeStep, bool isTransientSingleFile)
 {
     // Open File
     QFile file(filename);
@@ -69,6 +70,40 @@ bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timeste
         return false;
     }
 
+    // file contains only a single time step
+    if (!isTransientSingleFile)
+        return readAsciiGeometryTimeStep(ensight, file, timestep);
+
+    bool readSingleStep = readTimeStep >= 0;
+    int skipped = 0;
+
+    // file contains multiple time steps
+    while (!file.atEnd())
+    {
+        QString line = file.readLine();
+        if (line.contains("BEGIN TIME STEP"))
+        {
+            // if only a single time step should be read, skip over preceding steps
+            if (readSingleStep && readTimeStep != skipped)
+            {
+                skipped++;
+                continue;
+            }
+
+            bool success = readAsciiGeometryTimeStep(ensight, file, timestep++);
+            if (!success)
+                return false;
+
+            if (readSingleStep)
+                break;
+        }
+    }
+    return true;
+}
+
+
+bool readAsciiGeometryTimeStep(EnsightObj& ensight, QFile& file, int timestep)
+{
     // Local variables
     EnsightPart* part = nullptr;
     IdMode nodeIdMode, elementIdMode;
@@ -82,7 +117,12 @@ bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timeste
     while (!file.atEnd())
     {
         QString line = file.readLine();
-        if (line.contains("extents"))
+
+        if (line.contains("END TIME STEP"))
+        {
+            break;
+        }
+        else if (line.contains("extents"))
         {
             // Skip over bounding box values (3 lines with 2 values)
             file.readLine();
@@ -185,14 +225,11 @@ bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timeste
             Mati cells = Mati(n_nodes, n_cells);
             for (int i = 0; i < n_cells; i++)
             {
-                //char buf128[128];
-                //file.readLine(buf128, 128);
                 QByteArray lineBytes = file.readLine();
                 for (int j = 0; j < n_nodes; j++)
                 {
                     QByteArray bytes = lineBytes.mid(j*10, 10).trimmed();
                     bool conversionOk;
-                    //cells(j,i) = atoi(buf128 + j*10)-1;
                     cells(j, i) = bytes.toInt(&conversionOk) - 1;
                     if (!conversionOk)
                     {
@@ -204,18 +241,13 @@ bool readAsciiGeometry(EnsightObj& ensight, const QString& filename, int timeste
             ensight.setCells(part, cells, timestep, cellType);
         }
     }
-    file.close();
     return true;
 }
 
-bool readAsciiGeometry(EnsightObj &ensight, const std::string &filename, int timestep)
-{
-    return readAsciiGeometry(ensight, QString::fromStdString(filename), timestep);
-}
-
 bool readAsciiVariable(EnsightObj& ensight, const QString& filename,
-                       const QString& name, int timestep,
-                       Ensight::VarTypes type, int dim)
+                       const QString& name, int timestep, int readTimeStep,
+                       bool isTransientSingleFile, Ensight::VarTypes type,
+                       int dim)
 {
     // Open File
     QFile file(filename);
@@ -225,11 +257,51 @@ bool readAsciiVariable(EnsightObj& ensight, const QString& filename,
         return false;
     }
 
+    // file contains only a single time step
+    if (!isTransientSingleFile)
+        return readAsciiVariableTimeStep(ensight, file, name, timestep, type, dim);
+
+    bool readSingleStep = readTimeStep >= 0;
+    int skipped = 0;
+
+    // file contains multiple time steps
+    while (!file.atEnd())
+    {
+        QString line = file.readLine();
+        if (line.contains("BEGIN TIME STEP"))
+        {
+            // if only a single time step should be read, skip over preceding steps
+            if (readSingleStep && readTimeStep != skipped)
+            {
+                skipped++;
+                continue;
+            }
+
+            bool success = readAsciiVariableTimeStep(ensight, file, name,
+                                                     timestep++, type, dim);
+            if (!success)
+                return false;
+
+            if (readSingleStep)
+                break;
+        }
+    }
+    return true;
+}
+
+bool readAsciiVariableTimeStep(EnsightObj& ensight, QFile& file,
+                               const QString& name, int timestep,
+                               Ensight::VarTypes type, int dim)
+{
     while (!file.atEnd())
     {
         QString line = file.readLine();
         line = line.left(line.indexOf("#")).trimmed();
-        if (line.startsWith("part"))
+        if (line.contains("END TIME STEP"))
+        {
+            break;
+        }
+        else if (line.startsWith("part"))
         {
             //read part id
             QString line = file.readLine();
@@ -277,7 +349,6 @@ bool readAsciiVariable(EnsightObj& ensight, const QString& filename,
             ensight.setVariable(part, name, values, type, timestep);
         }
     }
-    file.close();
     return true;
 }
 

@@ -24,8 +24,8 @@
 #include "../include/ensightreader.h"
 
 #include <memory>
-#include <QDebug>
 #include <QFileInfo>
+#include <QTextStream>
 #include "../include/ensightasciireader.h"
 #include "../include/ensightbinaryreader.h"
 #include "../include/ensightobj.h"
@@ -33,40 +33,23 @@
 using namespace Ensight::Reader::detail;
 
 
-EnsightCase::EnsightCase() :
-    masterFileName(),
-    modelFilename(),
-    modelTimeset(-2),
-    timesetId(-1),
-    timesetSteps(-1),
-    timesetFilenameStart(-1),
-    timesetFilenameIncrement(-1),
-    timesteps(Vecx::Zero(0))
+EnsightCase::EnsightCase()
+    : masterFileName(), modelFilename(), modelTimeset(-2), modelFileSet(-1),
+      timesetId(-1), timesetSteps(-1), timesetFilenameStart(-1),
+      timesetFilenameIncrement(-1), timesteps(Vecx::Zero(0)), filesetId(-1),
+      filesetSteps(-1)
 {
 }
 
-EnsightCase::EnsightCase(const QString& fileName) :
-    modelFilename(),
-    modelTimeset(-2),
-    timesetId(-1),
-    timesetSteps(-1),
-    timesetFilenameStart(-1),
-    timesetFilenameIncrement(-1),
-    timesteps(Vecx::Zero(0))
+EnsightCase::EnsightCase(const QString& fileName)
+    : EnsightCase()
 {
     masterFileName = QFileInfo(fileName).absoluteFilePath();
 }
 
-EnsightCase::EnsightCase(const std::string &fileName) :
-    modelFilename(),
-    modelTimeset(-2),
-    timesetId(-1),
-    timesetSteps(-1),
-    timesetFilenameStart(-1),
-    timesetFilenameIncrement(-1),
-    timesteps(Vecx::Zero(0))
+EnsightCase::EnsightCase(const std::string& fileName)
+    : EnsightCase(QString::fromStdString(fileName))
 {
-    masterFileName = QFileInfo(QString::fromStdString(fileName)).absoluteFilePath();
 }
 
 
@@ -75,7 +58,7 @@ void EnsightCase::setMasterFileName(const QString& fileName)
     this->masterFileName = fileName;
 }
 
-void EnsightCase::setMasterFileName(const std::string &fileName)
+void EnsightCase::setMasterFileName(const std::string& fileName)
 {
     this->masterFileName = QString::fromStdString(fileName);
 }
@@ -85,8 +68,9 @@ bool EnsightCase::readCaseFile()
     QFile file(this->masterFileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        EnsightObj::ERROR_STR = "[EnsightReader::read()] Cannot read from file  " + this->masterFileName + ".";
-        qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()] Cannot read from file  " +
+            this->masterFileName + ".";
         return false;
     }
 
@@ -108,7 +92,7 @@ bool EnsightCase::readCaseFile()
         QString line = data.takeFirst();
         Ensight::Section section = getSection(line);
 
-        //evaluate and read section
+        // evaluate and read section
         switch (section)
         {
         case Ensight::SectionUnknown:
@@ -116,42 +100,41 @@ bool EnsightCase::readCaseFile()
 
         case Ensight::Format:
             if (!readSectionFormat(data))
-            {
-                qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
                 return false;
-            }
             break;
 
         case Ensight::Geometry:
-            if (!readSectionGeometry(data, modelFilename, modelTimeset))
-            {
-                qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
+            if (!readSectionGeometry(data, modelFilename, modelTimeset,
+                                     modelFileSet))
                 return false;
-            }
             break;
 
         case Ensight::Variable:
-            if (!readSectionVariables(data, variableNames, variableFilenames, variableTimesets, variableTypes,
-                                      constantsNames, constantsValues))
-            {
-                qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
+            if (!readSectionVariables(data, variableNames, variableFilenames,
+                                      variableTimeSets, variableFileSets,
+                                      variableTypes, constantsNames,
+                                      constantsValues))
                 return false;
-            }
             break;
 
         case Ensight::Time:
-            if (!readSectionTimeset(data, timesetId, timesetSteps, timesetFilenameStart, timesetFilenameIncrement,
-                                    timesteps))
-            {
-                qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
+            if (!readSectionTime(data, timesetId, timesetSteps,
+                                 timesetFilenameStart, timesetFilenameIncrement,
+                                 timesteps))
                 return false;
-            }
             break;
 
         case Ensight::File:
-            EnsightObj::ERROR_STR = "[EnsightReader::read()] SECTION FILE is not supported in this version of EnsightLib. Maybe in later versions";
-            qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
-            return false;
+            if (!readSectionFile(data, filesetId, filesetSteps))
+                return false;
+            if (filesetSteps != timesetSteps)
+            {
+                EnsightObj::ERROR_STR = "[EnsightReader::read()] Number of "
+                                        "steps in file set must be equal to "
+                                        "number of steps in time set.";
+                return false;
+            }
+            break;
 
         default:
             break;
@@ -161,51 +144,21 @@ bool EnsightCase::readCaseFile()
 
     if (modelFilename.isEmpty())
     {
-        EnsightObj::ERROR_STR = "[EnsightReader::read()] SECTION GEOMETRY  not found.";
-        qDebug() << "### EnsightCase::readCaseFile => " << EnsightObj::ERROR_STR;
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()] SECTION GEOMETRY  not found.";
         return false;
     }
 
     return true;
 }
 
-
-void EnsightCase::print() const
+int EnsightCase::getFileNumberForStep(int step) const
 {
-    QString tmpText;
-    int tmpInteger;
-    Ensight::VarTypes tmpTypes;
-    double tmpDouble;
-
-    qDebug() << "masterFileName: " << masterFileName;
-    qDebug() << "modelFileName: " << modelFilename;
-    qDebug() << "modelTimeset: " << modelTimeset;
-    qDebug() << "variableNames: ";
-    foreach (tmpText, variableNames)
-        qDebug() << tmpText;
-    qDebug() << "variableTimesets: ";
-    foreach (tmpText, variableFilenames)
-        qDebug() << tmpText;
-    qDebug() << "variableTimesets: ";
-    foreach (tmpInteger, variableTimesets)
-        qDebug() << tmpInteger;
-    qDebug() << "variableTypes: ";
-    foreach (tmpTypes, variableTypes)
-        qDebug() << tmpTypes;
-    qDebug() << "constantsNames: ";
-    foreach (tmpText, constantsNames)
-        qDebug() << tmpText;
-    qDebug() << "constantValues: ";
-    foreach (tmpDouble, constantsValues)
-        qDebug() << tmpDouble;
-    qDebug() << "timesetId: " << timesetId;
-    qDebug() << "timesetSteps: " << timesetSteps;
-    qDebug() << "timesetFilenameStart: " << timesetFilenameStart;
-    qDebug() << "timesetFilenameIncrement: " << timesetFilenameIncrement;
-    qDebug() << "timesteps: ";
-    for (int i = 0; i < timesteps.rows(); i++)
-        qDebug() << timesteps(i);
+    if (timesetFilenameStart < 0 || timesetFilenameIncrement <= 0)
+        return step;
+    return timesetFilenameStart + step * timesetFilenameIncrement;
 }
+
 
 namespace Ensight
 {
@@ -214,7 +167,7 @@ namespace Reader
 
 EnsightObj* read(const QString& filename, int readTimeStep)
 {
-    //read the casefile
+    // read the casefile
     EnsightCase caseFile(filename);
     bool caseFileReadSuccess = caseFile.readCaseFile();
     if (!caseFileReadSuccess)
@@ -227,41 +180,50 @@ EnsightObj* read(const QString& filename, int readTimeStep)
     ensight->beginEdit();
 
     // Time steps
-    if (readTimeStep >= caseFile.timesteps.rows())
-    {
-
-        EnsightObj::ERROR_STR = QString("In [EnsightReader::read()] requested time step %1 "
-                                        "(index %2) but file contains only %3 time steps.")
-                                .arg(readTimeStep+1)
-                                .arg(readTimeStep)
-                                .arg(caseFile.timesteps.rows());
-        return nullptr;
-    }
     bool isTransient = caseFile.timesetId == 1 && caseFile.timesteps.rows() > 1;
     bool readTransientAsStatic = isTransient && readTimeStep >= 0;
     if (isTransient && !readTransientAsStatic)
         ensight->setTransient(caseFile.timesteps);
     else
         ensight->setStatic();
+    bool isTransientSingleFile = isTransient && caseFile.filesetId >= 0;
+
+    if (readTimeStep >= caseFile.timesteps.rows() &&
+        (isTransient || readTimeStep > 0))
+    {
+
+        EnsightObj::ERROR_STR =
+            QString("In [EnsightReader::read()] requested time step %1 "
+                    "(index %2) but file contains only %3 time steps.")
+                .arg(readTimeStep + 1)
+                .arg(readTimeStep)
+                .arg(caseFile.timesteps.rows());
+        return nullptr;
+    }
 
     // Constants
     for (int i = 0; i < caseFile.constantsNames.size(); i++)
-        ensight->addConstant(caseFile.constantsNames.at(i), caseFile.constantsValues.at(i));
+        ensight->addConstant(caseFile.constantsNames.at(i),
+                             caseFile.constantsValues.at(i));
 
     // Ascii or binary format. Will be determined once in the next loop
     bool binary = false;
 
     // Geometry
-    for (int timestep = 0; timestep < ensight->getNumberOfTimesteps(); timestep++)
+    int numFiles = isTransientSingleFile ? 1 : ensight->getNumberOfTimesteps();
+    for (int timestep = 0; timestep < numFiles; timestep++)
     {
         QString geometryFile = caseFile.modelFilename;
-        if (isTransient)
+        if (isTransient && !isTransientSingleFile)
         {
-            int fileNameStep = readTransientAsStatic ? readTimeStep : timestep;
-            if (!checkWildcards(geometryFile, fileNameStep))
+            int step = readTransientAsStatic ? readTimeStep : timestep;
+            int fileNumber = caseFile.getFileNumberForStep(step);
+            if (!checkWildcards(geometryFile, fileNumber))
             {
-                EnsightObj::ERROR_STR = "In [EnsightReader::read()] for timestep = " + QString::number(timestep) + "." +
-                                        " Something wrong with the wildcards or the according time step for geometry model. ";
+                EnsightObj::ERROR_STR =
+                    "In [EnsightReader::read()] for timestep = " +
+                    QString::number(step) + ". Something wrong with the "
+                    "wildcards or the corresponding time step for geometry model.";
                 return nullptr;
             }
 
@@ -269,7 +231,8 @@ EnsightObj* read(const QString& filename, int readTimeStep)
             int firstWildCard = geometryFile.indexOf("*");
 
             geometryFile.replace(firstWildCard, numWildcards,
-                                 QString("%0").arg(fileNameStep, numWildcards, 10, QLatin1Char('0')));
+                                 QString("%0").arg(fileNumber, numWildcards,
+                                                   10, QLatin1Char('0')));
         }
         geometryFile.prepend(path + "/");
 
@@ -278,7 +241,8 @@ EnsightObj* read(const QString& filename, int readTimeStep)
             FileType type = getEnsightFileType(geometryFile);
             if (type == FileType::Fortran_Binary)
             {
-                EnsightObj::ERROR_STR = "In [EnsightReader::read()] Format \"Fortran Binary\" is not supported.";
+                EnsightObj::ERROR_STR = "In [EnsightReader::read()] Format "
+                                        "\"Fortran Binary\" is not supported.";
                 return nullptr;
             }
             binary = type == FileType::C_Binary;
@@ -286,18 +250,20 @@ EnsightObj* read(const QString& filename, int readTimeStep)
 
         if (binary)
         {
-            if (!(readBinaryGeometry(*ensight, geometryFile, timestep)))
+            if (!(readBinaryGeometry(*ensight, geometryFile, timestep,
+                                     readTimeStep, isTransientSingleFile)))
                 return nullptr;
         }
         else
         {
-            if (!(readAsciiGeometry(*ensight, geometryFile, timestep)))
+            if (!(readAsciiGeometry(*ensight, geometryFile, timestep,
+                                    readTimeStep, isTransientSingleFile)))
                 return nullptr;
         }
     }
 
     // Variables
-    for (int timestep = 0; timestep < ensight->getNumberOfTimesteps(); timestep++)
+    for (int timestep = 0; timestep < numFiles; timestep++)
     {
         for (int j = 0; j < caseFile.variableNames.size(); j++)
         {
@@ -309,21 +275,28 @@ EnsightObj* read(const QString& filename, int readTimeStep)
             {
                 if (!ensight->createVariable(varName, varType))
                 {
-                    EnsightObj::ERROR_STR = "In [EnsightReader::read()] for timestep = " + QString::number(timestep) + "." +
-                                            " Cannot create Variable with name " + varName;
+                    EnsightObj::ERROR_STR =
+                        "In [EnsightReader::read()] for timestep = " +
+                        QString::number(timestep) +
+                        ". Cannot create variable with name " + varName;
                     return nullptr;
                 }
             }
 
             int dim = Ensight::varTypeDims[varType];
 
-            if (isTransient)
+            if (isTransient && !isTransientSingleFile)
             {
-                int fileNameStep = readTransientAsStatic ? readTimeStep : timestep;
-                if (!checkWildcards(varFile, fileNameStep))
+                int step = readTransientAsStatic ? readTimeStep : timestep;
+                int fileNumber = caseFile.getFileNumberForStep(step);
+                if (!checkWildcards(varFile, fileNumber))
                 {
-                    EnsightObj::ERROR_STR = "In [EnsightReader::read()] for timestep = " + QString::number(timestep) + "." +
-                                            " Something wrong with the wildcards or the according time step for variable " + varName;
+                    EnsightObj::ERROR_STR =
+                        "In [EnsightReader::read()] for timestep = " +
+                        QString::number(step) +
+                        ". Something wrong with the wildcards or the "
+                        "corresponding time step for variable " +
+                        varName;
                     return nullptr;
                 }
 
@@ -331,19 +304,24 @@ EnsightObj* read(const QString& filename, int readTimeStep)
                 int firstWildCard = varFile.indexOf("*");
 
                 varFile.replace(firstWildCard, numWildcards,
-                                QString("%0").arg(fileNameStep, numWildcards, 10, QLatin1Char('0')));
+                                QString("%0").arg(fileNumber, numWildcards,
+                                                  10, QLatin1Char('0')));
             }
 
             varFile.prepend(path + "/");
 
             if (binary)
             {
-                if (!(readBinaryVariable(*ensight, varFile, varName, timestep, varType, dim)))
+                if (!(readBinaryVariable(*ensight, varFile, varName, timestep,
+                                         readTimeStep, isTransientSingleFile,
+                                         varType, dim)))
                     return nullptr;
             }
             else
             {
-                if (!(readAsciiVariable(*ensight, varFile, varName, timestep, varType, dim)))
+                if (!(readAsciiVariable(*ensight, varFile, varName, timestep,
+                                        readTimeStep, isTransientSingleFile,
+                                        varType, dim)))
                     return nullptr;
             }
         }
@@ -357,7 +335,7 @@ EnsightObj* read(const QString& filename, int readTimeStep)
     return ensight.release();
 }
 
-EnsightObj* read(const std::string &filename, int timestep)
+EnsightObj* read(const std::string& filename, int timestep)
 {
     return read(QString::fromStdString(filename), timestep);
 }
@@ -365,13 +343,21 @@ EnsightObj* read(const std::string &filename, int timestep)
 namespace detail
 {
 
+// returns the first element of the list or an empty string if list is empty
+QString first(const QStringList& list)
+{
+    return list.value(0, QString());
+}
+
 bool readSectionFormat(QStringList& data)
 {
     QString line = data.takeFirst();
 
     if (!line.startsWith("type"))
     {
-        EnsightObj::ERROR_STR = "[EnsightReader::read()] Unknown keyword in FORMAT section <" + line + ">.";
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()] Unknown keyword in FORMAT section <" +
+            line + ">.";
         return false;
     }
 
@@ -380,51 +366,89 @@ bool readSectionFormat(QStringList& data)
 
     if (line != "ensight gold")
     {
-        EnsightObj::ERROR_STR = "[EnsightReader::read()] Unknown format in line <" + line + ">. Only format <ensight gold> is supported by this libary.";
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()] Unknown format in line <" + line +
+            ">. Only format <ensight gold> is supported by this libary.";
         return false;
     }
     return true;
 }
 
 
-bool readSectionGeometry(QStringList& data, QString& modelFilename, int& modelTimeset)
+// Parse the optional time set and file set parts of a line into the output
+// parameters. If these parts exists and are correctly parsed, the corresponding
+// tokens are removed from the list. I.e., after this function has been called,
+// the remaining items in the list are the required parts.
+void parseOptionalTimeFileSet(QStringList& lineTokens, int& timeSet,
+                              int& fileSet)
+{
+    // try to parse time set
+    QString token = first(lineTokens);
+    bool conversionOk;
+    timeSet = token.toInt(&conversionOk);
+    if (conversionOk)
+    {
+        // take next token
+        lineTokens.removeFirst();
+        token = first(lineTokens);
+
+        // try to read file set only if time set could be read
+        fileSet = token.toInt(&conversionOk);
+        if (conversionOk)
+            lineTokens.removeFirst();
+        else
+            fileSet = -1;
+    }
+    else
+    {
+        timeSet = -1;
+        fileSet = -1;
+    }
+}
+
+
+bool readSectionGeometry(QStringList& data, QString& modelFilename,
+                         int& modelTimeset, int& modelFileSet)
 {
     QString line = data.takeFirst();
     if (!line.startsWith("model"))
     {
-        EnsightObj::ERROR_STR = "[EnsightReader::read()] Unknown keyword in GEOMETRY section<" + line + ">. Only the keyword <model> is supported by this library";
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()] Unknown keyword in GEOMETRY section<" +
+            line + ">. Only the keyword <model> is supported by this library";
         return false;
     }
 
-    //extract model-names into list
+    // extract model-names into list
     line = line.right(line.length() - line.indexOf(":") - 1);
-    QStringList model = line.split(" ", QString::SkipEmptyParts);
+    QStringList modelTokens = line.split(" ", QString::SkipEmptyParts);
 
-    //determine if static or transient geometry is used
-    switch (model.size())
+    // try to parse time set
+    parseOptionalTimeFileSet(modelTokens, modelTimeset, modelFileSet);
+
+    // The next token should be the geometry file name. The line is valid only
+    // if this is the last token.
+    if (modelTokens.size() != 1)
     {
-    case 1:  //static
-        modelFilename = model.first();
-        modelTimeset = -1;
-        return true;
-
-    case 2:  //transient
-        modelTimeset = model.at(0).toInt();
-        modelFilename = model.at(1);
-        return true;
-
-    default:
-        break;
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()] Unsupported format in GEOMETRY section in "
+            "line <" +
+            line + ">. (Note that the keyword [change_coords_only] "
+                   "or filenames containing spaces are not supported.)";
+        return false;
     }
 
-    EnsightObj::ERROR_STR = "[EnsightReader::read()] Unsupported format in GEOMETRY section in line <" + line + ">. " +
-                            "Note that the keyword [change_coords_only] is not supported and filesets are not supported.";
-    return false;
+    modelFilename = modelTokens.front();
+    return true;
 }
 
-bool readSectionVariables(QStringList& data, QStringList& variableNames, QStringList& variableFilenames,
-                          QList<int>& variableTimesets, QList<Ensight::VarTypes>& variableTypes,
-                          QStringList& constantsNames, QList<double>& constantsValues)
+bool readSectionVariables(QStringList& data, QStringList& variableNames,
+                          QStringList& variableFileNames,
+                          QList<int>& variableTimeSets,
+                          QList<int>& variableFileSets,
+                          QList<Ensight::VarTypes>& variableTypes,
+                          QStringList& constantsNames,
+                          QList<double>& constantsValues)
 {
     while (data.size() > 0)
     {
@@ -435,7 +459,9 @@ bool readSectionVariables(QStringList& data, QStringList& variableNames, QString
         Ensight::VarTypes varType = getVarType(line);
         if (varType == Ensight::VarTypeUnknown)
         {
-            EnsightObj::ERROR_STR = "[EnsightReader::read()] In VARIABLE section in line <" + line + ">. Unkown keyword or delimiter <:> not found.";
+            EnsightObj::ERROR_STR =
+                "[EnsightReader::read()] In VARIABLE section in line <" + line +
+                ">. Unkown keyword or delimiter <:> not found.";
             return false;
         }
 
@@ -443,37 +469,43 @@ bool readSectionVariables(QStringList& data, QStringList& variableNames, QString
         QStringList varSplit = line.split(" ", QString::SkipEmptyParts);
         if (varSplit.size() < 2)
         {
-            EnsightObj::ERROR_STR = "[EnsightReader::read()] In VARIABLE section in line <" + line + ">. At least variable type, name and value expected.";
+            EnsightObj::ERROR_STR =
+                "[EnsightReader::read()] In VARIABLE section in line <" + line +
+                ">. At least variable type, name and value expected.";
             return false;
         }
 
         if (varType == Ensight::ConstantPerCase)
         {
-            int offset = 0;
-            if (varSplit.size() > 2)  // transient
-                offset = 1;
-
-            constantsNames.append(varSplit.at(offset));
-            constantsValues.append(varSplit.at(offset+1).toDouble());
-        }
-        else if (varType == Ensight::ScalarPerNode || varType == Ensight::VectorPerNode)
-        {
-            int offset = 0;
-            if (varSplit.size() == 3)  // transient
-                offset = 1;
-            else if (varSplit.size() != 2 && varSplit.size() != 3)  // transient and file sets
+            if (varSplit.size() > 2) // transient
             {
-                EnsightObj::ERROR_STR = "[EnsightReader::read()] In VARIABLE section in line <" + line + ">. Expected fields after delimiter is 2 or 3. FILE SETS are not supported.";
+                EnsightObj::ERROR_STR =
+                    "[EnsightReader::read()] In VARIABLE section in line <" +
+                    line + ">. Transient constants are not supported.";
                 return false;
             }
 
-            if (varSplit.size() == 3)
-                variableTimesets << varSplit.at(0).toInt();
-            else
-                variableTimesets << -1;
+            constantsNames.append(varSplit.at(0));
+            constantsValues.append(varSplit.at(1).toDouble());
+        }
+        else if (varType == Ensight::ScalarPerNode ||
+                 varType == Ensight::VectorPerNode)
+        {
+            int timeSet, fileSet;
+            parseOptionalTimeFileSet(varSplit, timeSet, fileSet);
 
-            variableNames << varSplit.at(0 + offset);
-            variableFilenames << varSplit.at(1 + offset);
+            if (varSplit.size() != 2)
+            {
+                EnsightObj::ERROR_STR =
+                    "[EnsightReader::read()] In VARIABLE section in line <" +
+                    line + ">. Expected variable description and file name.";
+                return false;
+            }
+
+            variableTimeSets << timeSet;
+            variableFileSets << fileSet;
+            variableNames << varSplit.at(0);
+            variableFileNames << varSplit.at(1);
             variableTypes << varType;
         }
     }
@@ -481,73 +513,103 @@ bool readSectionVariables(QStringList& data, QStringList& variableNames, QString
 }
 
 
-bool readSectionTimeset(QStringList& data, int& timesetId,
-                        int& timesetSteps, int& timesetFilenameStart,
-                        int& timesetFilenameIncrement, Vecx& timesteps)
+bool readSectionTime(QStringList& data, int& timesetId, int& timesetSteps,
+                     int& timesetFilenameStart, int& timesetFilenameIncrement,
+                     Vecx& timesteps)
 {
-    for (int i = 0; i < Ensight::numTimeSetDef; i++)
-    {
-        QString line = data.takeFirst();
-        if (!line.startsWith(Ensight::strTimeSetDef[i]))
-        {
-            EnsightObj::ERROR_STR = "[EnsightReader::read()] In TIME section in line <" + line + ">. " +
-                                    "Unkown keyword or delimiter <:> not found. " + QString("%0 expected").arg(Ensight::strTimeSetDef[i]);
-            return false;
-        }
+    timesetId = -1;
+    timesetSteps = -1;
+    timesetFilenameStart = 1;
+    timesetFilenameIncrement = 1;
 
+    while (data.size() > 0)
+    {
+        QString line = data.first();
+        if (getSection(line) != Ensight::SectionUnknown)
+            break;
+        data.removeFirst();
+
+        QString keyword = line.left(line.indexOf(":")).trimmed();
         line = line.right(line.length() - line.indexOf(":") - 1).trimmed();
+        QStringList tokens = line.split(" ", QString::SkipEmptyParts);
         bool ok = true;
-        if (i == 0)
+
+        if (keyword == "time set")
         {
-            timesetId = line.toInt(&ok);
+            timesetId = first(tokens).toInt(&ok);
             if (timesetId != 1 || !ok)
             {
-                EnsightObj::ERROR_STR = "[EnsightReader::read()] In line <" + line + ">. " +
-                                        "This version of EnsightLib supports only TIME SET. " +
-                                        "This <time set> must have ID equal to 1. Don't use a description.";
+                EnsightObj::ERROR_STR =
+                    "[EnsightReader::read()] In line <" + line +
+                    ">. Only one <time set> is supported, which must have ID 1.";
                 return false;
             }
         }
-        else if (i == 1)
+        else if (keyword == "number of steps")
         {
             timesetSteps = line.toInt(&ok);
+            if (timesetSteps <= 0 || !ok)
+            {
+                EnsightObj::ERROR_STR =
+                    "[EnsightReader::read()] In line <" + line +
+                    ">: Invalid number of time steps";
+                return false;
+            }
         }
-        else if (i == 2)
+        else if (keyword == "filename start number")
         {
             timesetFilenameStart = line.toInt(&ok);
+            if (!ok)
+            {
+                EnsightObj::ERROR_STR = "[EnsightReader::read()] In line <" +
+                                        line + ">: Invalid number";
+                return false;
+            }
         }
-        else if (i == 3)
+        else if (keyword == "filename increment")
         {
             timesetFilenameIncrement = line.toInt(&ok);
             if (!ok)
             {
-                EnsightObj::ERROR_STR = "[EnsightReader::read()] In line <" + line + ">. " +
-                                        "Invalid <filename increment>.";
+                EnsightObj::ERROR_STR = "[EnsightReader::read()] In line <" +
+                                        line + ">. Invalid <filename increment>.";
                 return false;
             }
         }
-        else if (i == 4)
+        else if (keyword == "time values")
         {
-            QStringList timesetValuesStr = line.split(" ", QString::SkipEmptyParts);
+            if (timesetSteps <= 0)
+            {
+                EnsightObj::ERROR_STR = "[EnsightReader::read()] In line <" +
+                                        line + ">: Number of time steps must "
+                                        "be declared before time values.";
+                return false;
+            }
+
+            QStringList timesetValuesStr = tokens;
             timesteps = Vecx(timesetSteps);
             int j = 0;
             while (true)
             {
-                for (int k = 0; k < timesetValuesStr.size(); k++)
+                for (auto strValue : timesetValuesStr)
                 {
                     if (j >= timesetSteps)
                     {
-                        EnsightObj::ERROR_STR = "[EnsightReader::read()] Reading TIME SET values at line <" + line + ">. " +
-                                                "More values found than expected";
+                        EnsightObj::ERROR_STR =
+                            "[EnsightReader::read()] Reading TIME SET values "
+                            "at line <" +
+                            line + ">. " + "More values found than expected";
                         return false;
                     }
 
                     bool ok;
-                    timesteps[j++] = timesetValuesStr[k].toDouble(&ok);
+                    timesteps[j++] = strValue.toDouble(&ok);
                     if (!ok)
                     {
-                        EnsightObj::ERROR_STR = "[EnsightReader::read()] Reading TIME SET values at line <" + line + ">. " +
-                                                "Floating point values expected";
+                        EnsightObj::ERROR_STR =
+                            "[EnsightReader::read()] Reading time set values "
+                            "at line <" +
+                            line + ">. Floating point values expected";
                         return false;
                     }
                 }
@@ -556,7 +618,10 @@ bool readSectionTimeset(QStringList& data, int& timesetId,
                     break;
                 else if (data.size() == 0)
                 {
-                    EnsightObj::ERROR_STR = "[EnsightReader::read()] Reading TIME SET. End of CASE file reached but more floating point values expected as time steps.";
+                    EnsightObj::ERROR_STR = "[EnsightReader::read()] Reading "
+                                            "TIME SET. End of CASE file "
+                                            "reached but more floating point "
+                                            "values expected as time steps.";
                     return false;
                 }
 
@@ -565,6 +630,73 @@ bool readSectionTimeset(QStringList& data, int& timesetId,
             }
         }
     }
+
+    // check that required fiels have been read
+    if (timesetId <= 0 || timesetSteps <= 0)
+    {
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()]: Section TIME is incomplete.";
+        return false;
+    }
+
+    return true;
+}
+
+bool readSectionFile(QStringList& data, int& filesetId, int &filesetSteps)
+{
+    filesetId = -1;
+    filesetSteps = -1;
+
+    while (data.size() > 0)
+    {
+        QString line = data.first();
+        if (getSection(line) != Ensight::SectionUnknown)
+            break;
+        data.removeFirst();
+
+        QString keyword = line.left(line.indexOf(":")).trimmed();
+        line = line.right(line.length() - line.indexOf(":") - 1).trimmed();
+        QStringList tokens = line.split(" ", QString::SkipEmptyParts);
+        bool ok = true;
+
+        if (keyword == "file set")
+        {
+            filesetId = first(tokens).toInt(&ok);
+            if (filesetId != 1 || !ok)
+            {
+                EnsightObj::ERROR_STR =
+                    "[EnsightReader::read()] In line <" + line +
+                    ">. Only one <file set> is supported, which must have ID 1.";
+                return false;
+            }
+        }
+        else if (keyword == "number of steps")
+        {
+            filesetSteps = line.toInt(&ok);
+            if (filesetSteps <= 0 || !ok)
+            {
+                EnsightObj::ERROR_STR =
+                    "[EnsightReader::read()] In line <" + line +
+                    ">: Invalid number of time steps in file set.";
+                return false;
+            }
+        }
+        else if (keyword == "filename index")
+        {
+            EnsightObj::ERROR_STR = "[EnsightReader::read()] In line <" +
+                                    line + ">: filename index is not supported";
+            return false;
+        }
+    }
+
+    // check that required fiels have been read
+    if (filesetId <= 0 || filesetSteps <= 0)
+    {
+        EnsightObj::ERROR_STR =
+            "[EnsightReader::read()]: Section FILE is incomplete.";
+        return false;
+    }
+
     return true;
 }
 
@@ -614,16 +746,15 @@ bool checkWildcards(const QString& filename, int timestep)
     if (timestep == 0)
         numRequiredWildcards = 1;
 
-    if ((numWildcards > 0 && timestep < 0) || (numWildcards == 0 && timestep >= 0) ||
+    if ((numWildcards > 0 && timestep < 0) ||
+        (numWildcards == 0 && timestep >= 0) ||
         (numRequiredWildcards > numWildcards))
         return false;
 
     return true;
 }
 
-}
-
-// namespace detail
+} // namespace detail
 
 } // namespace Reader
 } // namespace Ensight

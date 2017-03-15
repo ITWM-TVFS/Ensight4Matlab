@@ -123,16 +123,20 @@ bool idsStoredInFile(IdMode mode)
     return mode == IdMode::Given || mode == IdMode::Ignore;
 }
 
-bool parseBinaryHeader(std::ifstream& in, IdMode& nodeIds,
-                       IdMode& elementIds)
+bool parseBinaryFormatHeader(std::ifstream& in)
 {
     FixedSizeLine line;
 
     // Read line "C Binary"
     readLine(in, line);
     toUpper(line.data);
-    if (strcmp(line, "C BINARY") != 0)
-        return false;
+    return strcmp(line, "C BINARY") == 0;
+}
+
+bool parseBinaryGeoHeader(std::ifstream& in, IdMode& nodeIds,
+                          IdMode& elementIds)
+{
+    FixedSizeLine line;
 
     // Skip over 2 description lines
     in.seekg(2*FixedSizeLine::length, std::ios_base::cur);
@@ -152,7 +156,9 @@ bool parseBinaryHeader(std::ifstream& in, IdMode& nodeIds,
     return success;
 }
 
-bool readBinaryGeometry(EnsightObj& ensight, const QString &filename, int timestep)
+bool readBinaryGeometry(EnsightObj& ensight, const QString& filename,
+                        int timestep, int readTimeStep,
+                        bool isTransientSingleFile)
 {
     // Open file and check if opened
     std::ifstream in(filename.toStdString().c_str(), std::ios::binary);
@@ -163,12 +169,57 @@ bool readBinaryGeometry(EnsightObj& ensight, const QString &filename, int timest
         return false;
     }
 
+    // The "C Binary" header comes first, outside of any time step blocks for
+    // transient single files.
+    if (!parseBinaryFormatHeader(in))
+    {
+        EnsightObj::ERROR_STR =  "In [EnsightBinaryReader::readGeometry()] Invalid file header.";
+        return false;
+    }
+
+    // file contains only a single time step
+    if (!isTransientSingleFile)
+        return readBinaryGeometryTimeStep(ensight, in, timestep);
+
+    bool readSingleStep = readTimeStep >= 0;
+    int skipped = 0;
+
+    // file contains multiple time steps
+    while (!in.eof())
+    {
+        FixedSizeLine line;
+        readLine(in, line);
+        if (in.fail())
+            break;
+
+        if (strcmp(line, "BEGIN TIME STEP") == 0)
+        {
+            // if only a single time step should be read, skip over preceding steps
+            if (readSingleStep && readTimeStep != skipped)
+            {
+                skipped++;
+                continue;
+            }
+
+            bool success = readBinaryGeometryTimeStep(ensight, in, timestep++);
+            if (!success)
+                return false;
+
+            if (readSingleStep)
+                break;
+        }
+    }
+    return true;
+}
+
+bool readBinaryGeometryTimeStep(EnsightObj& ensight, std::ifstream& in, int timestep)
+{
     // local variables
     FixedSizeLine line;
     EnsightPart *part = nullptr;
     IdMode nodeIdMode, elementIdMode;
 
-    if (!parseBinaryHeader(in, nodeIdMode, elementIdMode))
+    if (!parseBinaryGeoHeader(in, nodeIdMode, elementIdMode))
     {
         EnsightObj::ERROR_STR =  "In [EnsightBinaryReader::readGeometry()] Invalid file header.";
         return false;
@@ -180,7 +231,11 @@ bool readBinaryGeometry(EnsightObj& ensight, const QString &filename, int timest
         if (in.fail())
             break;
 
-        if (strcmp(line, "extents") == 0)
+        if (strcmp(line, "END TIME STEP") == 0)
+        {
+            break;
+        }
+        else if (strcmp(line, "extents") == 0)
         {
             // Skip over bounding box values (6 floats)
             in.seekg(6*sizeof(float), std::ios_base::cur);
@@ -283,8 +338,9 @@ bool readBinaryGeometry(EnsightObj& ensight, const QString &filename, int timest
 }
 
 bool readBinaryVariable(EnsightObj& ensight, const QString& filename,
-                        const QString& name, int timestep,
-                        Ensight::VarTypes type, int dim)
+                        const QString& name, int timestep, int readTimeStep,
+                        bool isTransientSingleFile, Ensight::VarTypes type,
+                        int dim)
 {
     std::ifstream in(filename.toStdString().c_str(), std::ios::binary);
     if(!in.is_open())
@@ -293,13 +349,58 @@ bool readBinaryVariable(EnsightObj& ensight, const QString& filename,
         return false;
     }
 
+    // file contains only a single time step
+    if (!isTransientSingleFile)
+        return readBinaryVariableTimeStep(ensight, in, name, timestep, type, dim);
+
+    bool readSingleStep = readTimeStep >= 0;
+    int skipped = 0;
+
+    // file contains multiple time steps
+    while (!in.eof())
+    {
+        FixedSizeLine line;
+        readLine(in, line);
+        if (in.fail())
+            break;
+
+        if (strcmp(line, "BEGIN TIME STEP") == 0)
+        {
+            // if only a single time step should be read, skip over preceding steps
+            if (readSingleStep && readTimeStep != skipped)
+            {
+                skipped++;
+                continue;
+            }
+
+            bool success = readBinaryVariableTimeStep(ensight, in, name,
+                                                      timestep++, type, dim);
+            if (!success)
+                return false;
+
+            if (readSingleStep)
+                break;
+        }
+    }
+    return true;
+}
+
+bool readBinaryVariableTimeStep(EnsightObj& ensight, std::ifstream& in,
+                                const QString& name, int timestep,
+                                Ensight::VarTypes type, int dim)
+{
     FixedSizeLine line;
     readLine(in, line);  // read description line
 
     while (!in.eof())
     {
-        readLine(in, line);  // read until a line with "part" is found
-        if (strcmp(line, "part") == 0)
+        // read until a line with "part" is found or end of time step is reached
+        readLine(in, line);
+        if (strcmp(line, "END TIME STEP") == 0)
+        {
+            break;
+        }
+        else if (strcmp(line, "part") == 0)
         {
             int32_t part_id;
             readInt(in, part_id);
