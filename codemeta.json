@@ -1,0 +1,60 @@
+{
+  "@context": "https://raw.githubusercontent.com/mbjones/codemeta/master/codemeta.jsonld",
+  "@type": "Code",
+  "author": [
+    {
+      "@id": "http://orcid.org/0000-0002-4400-9635",
+      "@type": "Person",
+      "email": "andre.schmeisser@itwm.fraunhofer.de",
+      "name": "Andre Schmeißer",
+      "affiliation": "Fraunhofer ITWM"
+    },
+    {
+      "@type": "Person",
+      "email": "daniel.burkhart@gmail.com",
+      "name": "Daniel Burkhardt",
+    },
+    {
+      "@type": "Person",
+      "email": "dominik.linn@itwm.fraunhofer.de",
+      "name": "Dominik Linn",
+      "affiliation": "Fraunhofer ITWM"
+    },
+    {
+      "@type": "Person",
+      "email": "johannes.schnebele@itwm.fraunhofer.de",
+      "name": "Johannes Schnebele",
+      "affiliation": "Fraunhofer ITWM"
+    },
+    {
+      "@type": "Person",
+      "email": "manuel.ettmueller@itwm.fraunhofer.de",
+      "name": "Manuel Ettmüller",
+      "affiliation": "Fraunhofer ITWM"
+    },
+    {
+      "@id": "http://orcid.org/0000-0002-6720-9840",
+      "@type": "Person",
+      "email": "simone.gramsch@itwm.fraunhofer.de",
+      "name": "Simone Gramsch",
+      "affiliation": "Fraunhofer ITWM"
+    },
+    {
+      "@id": "http://orcid.org/0000-0001-5364-3788",
+      "@type": "Person",
+      "email": "walter.arne@itwm.fraunhofer.de",
+      "name": "Walter Arne",
+      "affiliation": "Fraunhofer ITWM"
+    }
+  ],
+  "identifier": "",
+  "codeRepository": "https://github.com/ITWM-TVFS/Ensight4Matlab",
+  "datePublished": "2017-03-15",
+  "dateModified": "2017-03-15",
+  "dateCreated": "2017-03-15",
+  "description": "Ensight4Matlab let's you read, process, and write files in EnSight Gold format from your C++ or MATLAB code.",
+  "keywords": "Data import, Ensight Gold, CFD, Matlab, Matlab-Wrapper, C++",
+  "license": "MIT",
+  "title": "Ensight4Matlab",
+  "version": ""
+}
