@@ -47,7 +47,7 @@ public:
     ~MainWidget();
 
 private:
-    void loadEnsightFile(const QString &filename);
+    void loadEnsightFile(const QString& filename, int timeStep);
     const QString boundsToString(const Matx& bounds, int dim) const;
     const QString boundsToString(const Bbox& bounds, int dim) const;
     void fillTable();
@@ -55,6 +55,9 @@ private:
 
     void drawOctree(const OctreeNode& node);
     void drawQuadtree(const QuadtreeNode& node);
+
+    int selectTimeStep(const QString& fileName, bool& cancel);
+    void openFile(bool singleTimeStep);
 
     QStringList inactiveParts();
 
@@ -72,10 +75,12 @@ private slots:
     void on_colorcomponent_currentIndexChanged(int index);
 
     void on_actionOpen_triggered();
+    void on_actionImport_single_time_step_triggered();
     void on_actionViewAll_triggered();
     void on_actionAlign_triggered();
     void on_actionDisplayAxis_toggled();
     void on_actionDisplaySubdivTree_toggled();
+
 
 private:
     enum RepresentationModes { Outline = 0, Wireframe, Surface, Volume, numRepresentationModes };

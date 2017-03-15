@@ -200,6 +200,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionImport_single_time_step"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -251,6 +252,14 @@
    </property>
    <property name="toolTip">
     <string>Display Octree / Quadtree</string>
+   </property>
+  </action>
+  <action name="actionImport_single_time_step">
+   <property name="text">
+    <string>Import Single Time Step...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
  </widget>

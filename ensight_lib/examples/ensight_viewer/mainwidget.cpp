@@ -26,12 +26,14 @@
 
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QInputDialog>
 #include <QMap>
 #include <QSettings>
 #include "ensightcell.h"
 #include "ensightlib.h"
 #include "ensightobj.h"
 #include "ensightpart.h"
+#include "ensightreader.h"
 #include "ensightvariable.h"
 
 QStringList MainWidget::strRepresentationModes = QStringList() << "Outline"
@@ -73,13 +75,13 @@ void MainWidget::closeEvent(QCloseEvent*)
         viewer->close();
 }
 
-void MainWidget::loadEnsightFile(const QString & filename)
+void MainWidget::loadEnsightFile(const QString& filename, int timeStep)
 {
     QTime t;
     t.start();
     qDebug() << "Load File: " << filename;
 
-    ensight.reset(EnsightLib::readEnsight(filename));
+    ensight.reset(EnsightLib::readEnsight(filename, timeStep));
     qDebug() << "Time to read File: " << t.elapsed();
     partMode.clear();
 
@@ -484,7 +486,27 @@ void MainWidget::on_colorcomponent_currentIndexChanged(int)
     viewer->gl->updateGL();
 }
 
-void MainWidget::on_actionOpen_triggered()
+int MainWidget::selectTimeStep(const QString& fileName, bool& cancel)
+{
+    // read case file to get the number of time steps
+    EnsightCase caseFile(fileName);
+    if (!caseFile.readCaseFile())
+    {
+        QMessageBox::critical(this, "Error", EnsightObj::ERROR_STR);
+        cancel = true;
+        return -1;
+    }
+
+    bool ok;
+    int nTimeSteps = caseFile.timesteps.rows();
+    int timeStep = QInputDialog::getInt(this, "Import EnSight data at time step ...",
+                                        "Time Step:", 0, 0, nTimeSteps-1, 1, &ok);
+
+    cancel = !ok;
+    return timeStep;
+}
+
+void MainWidget::openFile(bool singleTimeStep)
 {
     QSettings settings;
     QString lastFile = settings.value("last_file").toString();
@@ -493,9 +515,28 @@ void MainWidget::on_actionOpen_triggered()
                                                     lastFile, filter);
     if (!fileName.isEmpty())
     {
+        int timeStep = -1;
+        if (singleTimeStep)
+        {
+            bool cancel = false;
+            timeStep = selectTimeStep(fileName, cancel);
+            if (cancel)
+                return;
+        }
+
         settings.setValue("last_file", fileName);
-        loadEnsightFile(fileName);
+        loadEnsightFile(fileName, timeStep);
     }
+}
+
+void MainWidget::on_actionOpen_triggered()
+{
+    openFile(false);
+}
+
+void MainWidget::on_actionImport_single_time_step_triggered()
+{
+    openFile(true);
 }
 
 void MainWidget::on_actionViewAll_triggered()
