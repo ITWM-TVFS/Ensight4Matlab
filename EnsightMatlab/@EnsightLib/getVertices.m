@@ -78,7 +78,7 @@ function varargout = getVertices(varargin)
         end
     else % single timestep
         buffer = EnsightLib_interface('part', 'getVertices', valueArray, this.getObjectHandle(), part, timestep);
-        varargour{1} = buffer;
+        varargout{1} = buffer;
     end
 end
 

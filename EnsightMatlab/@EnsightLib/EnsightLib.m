@@ -63,6 +63,7 @@ classdef EnsightLib < handle
       % Verify correctness of part_name / part_id
       % Return part_id if correct, -1 otherwise
       function id = verifyPartIdentifier(this, identifier)
+        ok = 0;
         if(isnumeric(identifier) && floor(identifier)==identifier)
             [ok,idx] = ismember(identifier,cell2mat(this.EnsightPartList(:,1)));
         elseif isa(identifier,'char')
@@ -78,6 +79,7 @@ classdef EnsightLib < handle
       
       % Get the index of an EnsightPart inside EnsightPartList
       function idx = getPartIndex(this, identifier)
+        ok = 0;
         if(isnumeric(identifier) && floor(identifier)==identifier)
             [ok,idx] = ismember(identifier,cell2mat(this.EnsightPartList(:,1)));
         elseif isa(identifier,'char')

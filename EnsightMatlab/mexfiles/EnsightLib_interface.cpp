@@ -446,7 +446,8 @@ void EnsightMatlab::readEnsight(const mxArray* prhs[], mxArray* plhs[])
 
     EnsightObj* object = EnsightLib::readEnsight(QString(filename));
     if (object == 0)
-        throw std::runtime_error("Could not read file.");
+        throw std::runtime_error(std::string("Could not read file. EnsightObj::ERROR_STR='")
+        + EnsightObj::ERROR_STR.toStdString() + "'");
 
     int NTstep = object->getNumberOfTimesteps();
     int NVar = object->getNumberOfVariables();
@@ -555,10 +556,10 @@ void EnsightMatlab::readEnsight(const mxArray* prhs[], mxArray* plhs[])
 
 void EnsightMatlab::writeEnsight(EnsightObj* object, const mxArray* prhs[])
 {
-    char filename[64];
+    char filename[512];
 
     if (mxGetString(prhs[4], filename, sizeof(filename)))
-        throw std::runtime_error("Second input (filename) should be a string less than 64 characters long.");
+        throw std::runtime_error("Second input (filename) should be a string less than 512 characters long.");
 
     const bool mode = static_cast<bool>(MexTools::getIntegerScalar(prhs, 5));
     const double timestep = MexTools::getIntegerScalar(prhs, 6);
