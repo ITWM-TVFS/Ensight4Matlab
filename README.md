@@ -4,7 +4,7 @@ Ensight4Matlab let's you read, process, and write files in EnSight Case Gold for
 
 <img align="right" src="images/ensightviewer_velocity_small.png">
 The Ensight Gold format represents a 3D mesh and variable fields defined over the domain of this mesh. The mesh and/or variables may be either static in time or time-varying. The Ensight Gold format is used to save e.g. CFD and CAE data, and widely supported by many software tools. It is specified by CEI software, Inc., see http://www.ceisoftware.com for more details.<br>
-This packages provides a C++ based library which you can directly link (statically or dynamically) to your application. Additionally, it provides a language binding for MATLAB to easily use the C++ library in your MATLAB scripts.
+This packages provides a C++ based library to process e.g. CFD data sets in Ensight Format, which you can directly link (statically or dynamically) to your application. Additionally, it provides a language binding for MATLAB to easily use the C++ library in your MATLAB scripts, e.g. for analysis and rapid protoyping.
 
 
 Table of Contents
