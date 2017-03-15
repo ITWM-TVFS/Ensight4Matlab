@@ -1,6 +1,6 @@
 # Ensight4Matlab
 
-Ensight4Matlab let's you read, process, and write files in EnSight Case Gold format from your C++ or MATLAB&reg; code.
+Ensight4Matlab let's you read, process, and write files in EnSight Gold format from your C++ or MATLAB&reg; code.
 
 <img align="right" src="images/ensightviewer_velocity_small.png">
 The Ensight Gold format represents a 3D mesh and variable fields defined over the domain of this mesh. The mesh and/or variables may be either static in time or time-varying. The Ensight Gold format is used to save e.g. CFD and CAE data, and widely supported by many software tools. It is specified by CEI software, Inc., see http://www.ceisoftware.com for more details.<br>
@@ -92,7 +92,7 @@ This package comes with a full [C++ application example](#c-usage) and two [MATL
 
 Overview
 --------
-A data set in EnSight Case Gold format describes 3D data. This data can either be _static_ or _transient_, i.e. time-varying. The data consists of mesh geometry, represented as an unstructured grid, and optionally variables defined over the domain of the mesh, as well as constants. The mesh's domain is partitioned into one _parts_. Variables can either be scalar or vector valued. For instance, the example data set `data/jet.encas` contains the variables _temperature_ and _velocity_, meaning each vertex of the mesh has a scalar temperature value and a 3D velocity vector.
+A data set in EnSight Gold format describes 3D data. This data can either be _static_ or _transient_, i.e. time-varying. The data consists of mesh geometry, represented as an unstructured grid, and optionally variables defined over the domain of the mesh, as well as constants. The mesh's domain is partitioned into one _parts_. Variables can either be scalar or vector valued. For instance, the example data set `data/jet.encas` contains the variables _temperature_ and _velocity_, meaning each vertex of the mesh has a scalar temperature value and a 3D velocity vector.
 
 The mesh is represented as follows: For each time step, the mesh consists of
  * A list of 3D vertex coordinates
