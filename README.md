@@ -173,12 +173,16 @@ jet =
     EnsightVariableList: {6×3 cell}
               Constants: {0×2 cell}
 ```
-The command `methods EnsightLib` gives an overview of available methods. Use `help` to get more information on individual methods. The directory `EnsightMatlab/examples` contains two examples showing how to:
+The command `methods EnsightLib` gives an overview of available methods. Use `help` to get more information on individual methods. The directory `EnsightMatlab/examples` contains example files.
+The scripts 'example1.m' and 'example2.m' show how to:
  - Create a new object
  - Create parts
  - Add vertices, cells, and variables
  - Save the resulting object
  - Use `search` to query a point and `interpolateVariable` for interpolation (see below).
+
+The script `plot_jet.m` shows how to plot the example data set, either by directly using the data at the mesh's vertex positions, or by interpolating data over a regular grid.
+Finally, the script `extract_jet_2d_boundary_quads.m` reads the example data set, extracts a 2D slice by discarding all volumetric data, and then saves this slice as a new data set.
 
 
 Point location and variable interpolation
