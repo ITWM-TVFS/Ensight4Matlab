@@ -8,6 +8,10 @@
 %                triangle vertices is plotted but not the triangle itself)
 % interpolated plot: the data is interpolated over a dense grid
 
+% Temporarily adjust MATLAB path to find EnsightLib wrapper if not in path.
+temp_path = path;
+path(temp_path,'../');
+
 fileName = '../../data/jet.encas';
 
 if exist(fileName, 'file') ~= 2
@@ -43,6 +47,9 @@ xrange = linspace(-0.5, 0.5, nx);
 yrange = linspace(0.1, 1.4, ny);
 plot_interpolation(jet, 'temperature', xrange, yrange);
 title('Temperature (interpolated)');
+
+% Restore original path
+path(temp_path);
 
 
 function scatter_plot_all(ensObj, variableName, project2d)

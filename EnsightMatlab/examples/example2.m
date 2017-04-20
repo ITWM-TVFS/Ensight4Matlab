@@ -1,7 +1,7 @@
 % Example 2
 % Create Quadrangle cells with alternating normals
 
-% Load EnsightLib
+% Temporarily adjust MATLAB path to find EnsightLib wrapper if not in path.
 temp_path = path;
 path(temp_path, '../');
 
@@ -38,4 +38,6 @@ obj.endEdit;
 obj.writeCase('data/example2/example2.case');
 
 clear obj;
+
+% Restore original path
 path(temp_path);

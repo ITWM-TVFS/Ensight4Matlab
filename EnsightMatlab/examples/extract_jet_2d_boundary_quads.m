@@ -9,6 +9,10 @@
 % the two boundaries by discarding all cells/vertices with negative
 % z-coordinate.
 
+% Temporarily adjust MATLAB path to find EnsightLib wrapper if not in path.
+temp_path = path;
+path(temp_path, '../');
+
 inName = '../../data/jet.encas';
 outName = 'data/jet_2d.encas';
 
@@ -69,3 +73,6 @@ end
 
 ensOut.endEdit();
 ensOut.writeCase(outName );
+
+% Restore original path
+path(temp_path);

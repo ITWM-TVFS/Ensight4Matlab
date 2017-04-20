@@ -174,7 +174,7 @@ jet =
               Constants: {0×2 cell}
 ```
 The command `methods EnsightLib` gives an overview of available methods. Use `help` to get more information on individual methods. The directory `EnsightMatlab/examples` contains example files.
-The scripts 'example1.m' and 'example2.m' show how to:
+The scripts `example1.m` and `example2.m` show how to:
  - Create a new object
  - Create parts
  - Add vertices, cells, and variables

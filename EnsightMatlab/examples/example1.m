@@ -1,7 +1,7 @@
 % Example 1
 % Simple EnSight setup and coordinate interpolation
 
-% Load EnsightLib
+% Temporarily adjust MATLAB path to find EnsightLib wrapper if not in path.
 temp_path = path;
 path(temp_path,'../');
 
@@ -50,5 +50,5 @@ cell_index = obj.search(test_points,'vc');
 
 clear obj;
 
-% Restore old path variable
+% Restore original path
 path(temp_path);
