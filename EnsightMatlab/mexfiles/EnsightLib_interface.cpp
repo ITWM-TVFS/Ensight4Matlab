@@ -197,13 +197,13 @@ void MexTools::checkInputParam(const mxArray* prhs[], int nrhs, int nlhs)
     int nOut = static_cast<int>(typeList[1]);
     if (nrhs < nIn + 3)
     {
-        char err[64];
+        char err[128];
         sprintf(err, "Invalid number of input arguments. Got: %d , Expected: %d", nrhs - 3, nIn);
         throw std::runtime_error(err);
     }
     if (nlhs != nOut)
     {
-        char err[64];
+        char err[128];
         sprintf(err, "Invalid number of output arguments. Got: %d , Expected: %d", nlhs, nOut);
         throw std::runtime_error(err);
     }
@@ -215,7 +215,7 @@ void MexTools::checkInputParam(const mxArray* prhs[], int nrhs, int nlhs)
     {
         if (((int)typeList[i + 2] < 0) || ((int)typeList[i + 2] > 5))
         {
-            char err[64];
+            char err[128];
             sprintf(err, "Input[%d]: Invalid type identifier. ID:%d", i, (int)typeList[i + 2]);
             throw std::runtime_error(err);
         }
@@ -226,31 +226,31 @@ void MexTools::checkInputParam(const mxArray* prhs[], int nrhs, int nlhs)
         }
         else if ((type == MexTools::TNumeric) && (!mxIsNumeric(prhs[i + 3])))
         {
-            char err[64];
+            char err[128];
             sprintf(err, "Input[%d]: Numeric value expected.", i);
             throw std::runtime_error(err);
         }
         else if ((type == MexTools::TStruct) && (!mxIsStruct(prhs[i + 3])))
         {
-            char err[64];
+            char err[128];
             sprintf(err, "Input[%d]: Struct expected.", i);
             throw std::runtime_error(err);
         }
         else if ((type == MexTools::TCell) && (!mxIsCell(prhs[i + 3])))
         {
-            char err[64];
+            char err[128];
             sprintf(err, "Input[%d]: Cell array expected.", i);
             throw std::runtime_error(err);
         }
         else if ((type == MexTools::TString) && (!mxIsChar(prhs[i + 3])))
         {
-            char err[64];
+            char err[128];
             sprintf(err, "Input[%d]: String expected.", i);
             throw std::runtime_error(err);
         }
         else if ((type == MexTools::TBool) && (!mxIsLogical(prhs[i + 3])))
         {
-            char err[64];
+            char err[128];
             sprintf(err, "Input[%d]: Boolean value expected.", i);
             throw std::runtime_error(err);
         }
@@ -437,7 +437,7 @@ void EnsightMatlab::deleteEnsight(const mxArray* prhs[])
 
 void EnsightMatlab::readEnsight(const mxArray* prhs[], mxArray* plhs[])
 {
-    char filename[64];
+    char filename[2048];
     double* outArray;
     mxArray* valueArray;
 
@@ -556,7 +556,7 @@ void EnsightMatlab::readEnsight(const mxArray* prhs[], mxArray* plhs[])
 
 void EnsightMatlab::writeEnsight(EnsightObj* object, const mxArray* prhs[])
 {
-    char filename[512];
+    char filename[2048];
 
     if (mxGetString(prhs[4], filename, sizeof(filename)))
         throw std::runtime_error("Second input (filename) should be a string less than 512 characters long.");
@@ -691,7 +691,7 @@ void EnsightMatlab::replaceConstants(EnsightObj* object, const mxArray* prhs[])
         }
         else
         {
-            char warnmsg[64];
+            char warnmsg[128];
             sprintf(warnmsg, "obj_replaceConstants - invalid constant name '%c'\n", name);
             mexWarnMsgTxt(warnmsg);
         }
