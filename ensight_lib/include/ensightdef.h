@@ -25,7 +25,9 @@
 #define ENSIGHTDEF_H
 
 /**
- * The namespace Ensight summarizes the structural key words of the EnSight Gold format.
+ * The namespace Ensight summarizes the structural key words of the EnSight
+ * Gold format.
+ * These are implementation details used by the read and write functions.
  */
 namespace Ensight {
 
@@ -33,21 +35,23 @@ namespace Ensight {
  * @brief The Section enum contains the five sections used in the EnSight Gold case format:
  * (FORMAT, GEOMETRY, VARIABLE, TIME, FILE).
  */
-enum Section {SectionUnknown=-1, Format=0, Geometry=1, Variable=2, Time=3, File=4};
+enum Section { SectionUnknown=-1, Format=0, Geometry, Variable, Time,
+               File, LAST_SECTION };
 extern const char *strSections[];
-const int numSections = 5;
+const int numSections = LAST_SECTION;
 
 /**
- * @brief The Cell enum addresses the section GEOMETRY and contains all supported EnSight Gold Elements
- * (for details see "EnSight 7 User Manual" page 11-4).
+ * @brief The Cell enum addresses the section GEOMETRY and contains all
+ * supported EnSight Gold Elements (for details see "EnSight 7 User Manual" page 11-4).
  */
-enum Cell{Unknown=-1, Point=0, Bar=1, Triangle=2, Quadrangle=3, Tetradhedron=4, Pyramid=5, Wedge=6, Hexahedron=7};
+enum Cell { Unknown=-1, Point=0, Bar, Triangle, Quadrangle, Tetradhedron,
+            Pyramid, Wedge, Hexahedron, LAST_CELL_TYPE};
 extern const char *strCell[];
 extern const int numCellNodes[];
 extern const int numCellFaces[];
 const int maxNumNodesPerFace = 4;
 extern const int cellFaces[8][6][4];
-const int numCellTypes = 8;
+const int numCellTypes = LAST_CELL_TYPE;
 
 /**
  * @brief The VarTypes enum addresses the section VARIABLE and contains the supported variable type:
@@ -57,16 +61,11 @@ const int numCellTypes = 8;
  *
  * Not supported variables types are, e.g., tensors, complex scalars and vectors, and variables per element.
  */
-enum VarTypes {VarTypeUnknown=-1, ConstantPerCase=0, ScalarPerNode=1, VectorPerNode=2};
+enum VarTypes { VarTypeUnknown=-1, ConstantPerCase=0, ScalarPerNode,
+                VectorPerNode, LAST_VAR_TYPE};
 extern const char *strVarTypes[];
 extern const int varTypeDims[];
-const int numVarTypes = 3;
-
-/**
- * @brief strTimeSetDef addresses the section TIME.
- */
-extern const char *strTimeSetDef[];
-const int numTimeSetDef = 5;
+const int numVarTypes = LAST_VAR_TYPE;
 
 } // namespace Ensight
 

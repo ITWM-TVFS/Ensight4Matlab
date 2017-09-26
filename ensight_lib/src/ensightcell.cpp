@@ -33,7 +33,8 @@
 #include "../include/ensightvariable.h"
 
 
-EnsightCellList::EnsightCellList(Ensight::Cell type, const Mati& values, QString partName)
+EnsightCellList::EnsightCellList(Ensight::Cell type, const Mati& values,
+                                 const QString& partName)
 {
     type_ = type;
     values_ = values;
@@ -113,7 +114,8 @@ EnsightCellList::EnsightCellList(Ensight::Cell type, const Mati& values, QString
     side_normals = Matx(0, 0);
 }
 
-EnsightCellList::EnsightCellList(Ensight::Cell type, const Mati &values, std::string partName)
+EnsightCellList::EnsightCellList(Ensight::Cell type, const Mati &values,
+                                 const std::string& partName)
 {
     EnsightCellList(type, values, QString::fromStdString(partName));
 }
@@ -246,11 +248,11 @@ int EnsightCellIdentifier::getIndex() const
     return index_;
 }
 
-void EnsightCellIdentifier::print() const
+void EnsightCellIdentifier::print(std::ostream& out) const
 {
-    bounds_.print();
-    std::cout << "   " << index_ << std::endl;
-    std::cout << "   " << cellList_->getType() << std::endl;
+    bounds_.print(out);
+    out << "   " << index_ << "\n";
+    out << "   " << cellList_->getType() << "\n";
 }
 
 bool EnsightCellIdentifier::contains(const Vec3& pos, bool ignore2dCells) const

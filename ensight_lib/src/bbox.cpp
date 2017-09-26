@@ -155,7 +155,7 @@ const Vec3& Bbox::maxCorner() const
     return max_;
 }
 
-void Bbox::print() const
+void Bbox::print(std::ostream& out) const
 {
-    std::cout << min_.transpose() << "    /    " << max_.transpose() << std::endl;
+    out << min_.transpose() << "    /    " << max_.transpose() << "\n";
 }

@@ -32,11 +32,7 @@
 #include "GL/glu.h"
 #include <cmath>
 
-using Vecx = Eigen::VectorXd;
-using Vec3 = Eigen::Vector3d;
-using Vec2 = Eigen::Vector2d;
-using Matx = Eigen::MatrixXd;
-using Mati = Eigen::MatrixXi;
+#include "eigentypes.h"
 
 /**
  * @brief The GLWidget class is an extension of the Qt QGLWidget.

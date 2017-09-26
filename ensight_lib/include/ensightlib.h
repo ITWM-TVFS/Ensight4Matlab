@@ -97,14 +97,43 @@ class QString;
 class EnsightLib
 {
 public:
+    /**
+     * @brief Creates an empty Ensight object
+     */
     static EnsightObj* createEnsight();
-    static bool writeEnsight(EnsightObj* ensight, const QString& filename,
-                             bool binary, int timestep);
-    static bool writeEnsight(EnsightObj* ensight, const std::string& filename,
-                             bool binary, int timestep);
+
+    /**
+     * @brief Reads a data set in EnSight Gold format and returns a
+     * corresponding instance of EnsightObj representing the data set
+     * @param[in] filename The file name of the ".case" file
+     * @param[in] timestep Optionally specify the time step to read. For
+     * transient data sets, i.e. data sets with multiple time steps, this allows
+     * to only read a single time step. The resulting EnsightObj will then
+     * represent a static data set. The default argument of -1 loads all time
+     * steps, i.e. the full transient data set.
+     */
     static EnsightObj* readEnsight(const QString& filename, int timestep = -1);
     static EnsightObj* readEnsight(const std::string& filename,
                                    int timestep = -1);
+    /**
+     * @brief Writes an EnsightObj to EnSight Gold format
+     * @param[in] ensight The EnsightObj to write
+     * @param[in] filename The name of the ".case" file to write. Names of other
+     * files of the data set, e.g. geometry files, are deduced from this.
+     * @param[in] binary Write file in binary or ASCII format.
+     * @param[in] timestep Optionally write only a single time step. This is
+     * useful for incrementally creating data sets during a long running
+     * computation, i.e. sequentially writing individual time steps as they are
+     * computed. The .case file is only written when the first time step
+     * (timestep=0) is written, otherwise only the corresponding geometry and
+     * variable files are written.
+     * The default argument of -1 writes the entire data set, i.e. .case file
+     * and data files for all time steps.
+     */
+    static bool writeEnsight(EnsightObj* ensight, const QString& filename,
+                             bool binary, int timestep = -1);
+    static bool writeEnsight(EnsightObj* ensight, const std::string& filename,
+                             bool binary, int timestep = -1);
 };
 
 #endif // ENSIGHTLIB_H

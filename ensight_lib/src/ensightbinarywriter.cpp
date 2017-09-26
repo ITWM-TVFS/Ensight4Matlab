@@ -30,6 +30,13 @@
 #include "../include/ensightpart.h"
 #include "../include/ensightvariable.h"
 
+namespace Ensight
+{
+namespace Writer
+{
+namespace detail
+{
+
 // Ensight format stores 32 bit ints and floats
 using std::int32_t;
 static_assert(sizeof(float) == sizeof(int32_t), "float has the wrong size");
@@ -52,10 +59,10 @@ void write_ensight_float(const float val, std::ofstream& str)
     str.write(reinterpret_cast<const char*>(&val), sizeof(float));
 }
 
-bool EnsightBinaryWriter::writeBinary(EnsightObj* ensight, const QString& name,
-                                      const QString& path, int timestep)
+bool writeBinary(EnsightObj* ensight, const QString& name, const QString& path,
+                 int timestep)
 {
-    if (timestep == -1)
+    if (timestep < 0)
     {
         for (int i = 0; i < ensight->getNumberOfTimesteps(); i++)
             if (!writeBinaryGeo(ensight, name, path, i))
@@ -69,7 +76,7 @@ bool EnsightBinaryWriter::writeBinary(EnsightObj* ensight, const QString& name,
     for (int i = 0; i < ensight->getNumberOfVariables(); i++)
     {
         EnsightVariableIdentifier var = ensight->getVariable(i);
-        if (timestep == -1)
+        if (timestep < 0)
         {
             for (int j = 0; j < ensight->getNumberOfTimesteps(); j++)
             {
@@ -88,9 +95,9 @@ bool EnsightBinaryWriter::writeBinary(EnsightObj* ensight, const QString& name,
     return true;
 }
 
-bool EnsightBinaryWriter::writeBinaryVar(EnsightObj *ensight, const QString &name,
-                                         const QString &var, const QString &path,
-                                         int timestep, int dim)
+bool writeBinaryVar(EnsightObj* ensight, const QString& name,
+                    const QString& var, const QString& path, int timestep,
+                    int dim)
 {
     QString filename = QString("%0/%1.%2").arg(path).arg(name).arg(var);
 
@@ -152,8 +159,8 @@ bool EnsightBinaryWriter::writeBinaryVar(EnsightObj *ensight, const QString &nam
     return true;
 }
 
-bool EnsightBinaryWriter::writeBinaryGeo(EnsightObj* ensight, const QString& name,
-                                         const QString& path, int timestep)
+bool writeBinaryGeo(EnsightObj* ensight, const QString& name,
+                    const QString& path, int timestep)
 {
     QString filename = QString("%0/%1%2").arg(path).arg(name).arg(".geo");
 
@@ -223,3 +230,7 @@ bool EnsightBinaryWriter::writeBinaryGeo(EnsightObj* ensight, const QString& nam
     file.close();
     return true;
 }
+
+} // namespace detail
+} // namespace Writer
+} // namespace Ensight

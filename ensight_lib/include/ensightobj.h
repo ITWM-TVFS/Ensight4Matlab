@@ -24,6 +24,7 @@
 #ifndef ENSIGHTOBJ_H
 #define ENSIGHTOBJ_H
 
+#include <iosfwd>
 #include <memory>
 #include <string>
 #include <vector>
@@ -95,8 +96,8 @@ public:
 
     /**
      * @brief Creates a new Ensight part
-     * @param name A unique name for the new part
-     * @param id A unique id for the new part
+     * @param[in] name A unique name for the new part
+     * @param[in] id A unique id for the new part
      *
      * This creates a new Ensight part with given name and id.
      * If name or id are already in use an exception is thrown.
@@ -118,7 +119,7 @@ public:
 
     /**
      * @brief Get the i-th part of this Ensight file.
-     * @param i Integer smaller than the number of parts
+     * @param[in] i Integer smaller than the number of parts
      *
      * Get the i-th part of this Ensight file. i must be in [0, getNumberOfParts()-1];
      */
@@ -126,15 +127,14 @@ public:
 
     /**
      * @brief Get the EnsightPart with given name, NULL if not exists.
-     * @param name Part name
+     * @param[in] name Part name
      */
-    EnsightPart* getPartByName(const QString & name);
-    //#string
-    EnsightPart* getPartByName(const std::string & name);
+    EnsightPart* getPartByName(const QString& name);
+    EnsightPart* getPartByName(const std::string& name);
 
     /**
      * @brief Get EnsightPart with given ID, NULL if not exists.
-     * @param id Part ID
+     * @param[in] id Part ID
      */
     EnsightPart* getPartById(int id);
 
@@ -144,7 +144,7 @@ public:
     /**
      * @brief Defines that this Ensight Obj is transient, with the N timesteps defined
      * in the Nx1 Vector values.
-     * @param values Nx1 vector containing the N timesteps
+     * @param[in] values Nx1 vector containing the N timesteps
      */
     bool setTransient(const Vecx & values);
 
@@ -180,18 +180,18 @@ public:
 
     /**
      * @brief Sets the vertices for a part and a timestep.
-     * @param part Ensight part
-     * @param vertices A 3xN matrix
-     * @param timestep Timestep
+     * @param[in] part Ensight part
+     * @param[in] vertices A 3xN matrix
+     * @param[in] timestep Timestep
      */
     bool setVertices(EnsightPart* part, const Matx& vertices, int timestep);
 
     /**
      * @brief Sets the cells for a part and a time step
-     * @param part Ensight part
-     * @param cells MxN matrix defining N cells with M vertices each
-     * @param timestep Timestep
-     * @param e Cell Type
+     * @param[in] part Ensight part
+     * @param[in] cells MxN matrix defining N cells with M vertices each
+     * @param[in] timestep Timestep
+     * @param[in] e Cell Type
      * M and e must be consistent, i.e. if e==bar2,M=2
      */
     bool setCells(EnsightPart* part, const Mati& cells, int timestep, Ensight::Cell e);
@@ -212,8 +212,8 @@ public:
      * @brief Creates a new variable with given name.
      *
      * Name must be unique.
-     * @param name Unique variable name
-     * @param type Variable type (See Ensight::VarTypes for further information)
+     * @param[in] name Unique variable name
+     * @param[in] type Variable type (See Ensight::VarTypes for further information)
      * @return false if the given name already exists.
      */
     bool createVariable(const QString& name, Ensight::VarTypes type);
@@ -242,7 +242,7 @@ public:
 
     /**
      * @brief Checks if variable with name exists
-     * @param name Variable name
+     * @param[in] name Variable name
      */
     bool hasVariable(const QString &name) const;
     bool hasVariable(const std::string &name) const;
@@ -252,11 +252,11 @@ public:
      * @brief Sets values for a variable for a timestep with a given name.
      *
      * The matrix values must match the defined vertices of the geometry and the dimension of the variable.
-     * @param part Ensight Part
-     * @param name Variable name
-     * @param values Variable values
-     * @param type Variable type (See Ensight::VarTypes)
-     * @param timestep Timestep
+     * @param[in] part Ensight Part
+     * @param[in] name Variable name
+     * @param[in] values Variable values
+     * @param[in] type Variable type (See Ensight::VarTypes)
+     * @param[in] timestep Timestep
      */
     bool setVariable(EnsightPart* part, const QString& name, const Matx& values,
                      Ensight::VarTypes type, int timestep);
@@ -268,22 +268,22 @@ public:
      * @brief Adds a new constant with given name.
      *
      * Name must be unique.
-     * @param name Unique variable name
-     * @param value Variable value
+     * @param[in] name Unique variable name
+     * @param[in] value Variable value
      */
     bool addConstant(const QString& name, double value);
     bool addConstant(const std::string& name, double value);
 
     /**
-     * @brief Permanently removes a constant by its name.
-     * @param name Variable name
+     * @brief Removes a constant by its name.
+     * @param[in] name Variable name
      */
     bool removeConstant(const QString& name);
     bool removeConstant(const std::string& name);
 
     /**
      * @brief Checks if a constant with given name exists.
-     * @param name Constant name
+     * @param[in] name Constant name
      */
     bool hasConstant(const QString& name) const;
     bool hasConstant(const std::string& name) const;
@@ -291,7 +291,7 @@ public:
 
     /**
      * @brief Get a constant by its name.
-     * @param name Constant name
+     * @param[in] name Constant name
      */
     const EnsightConstant& getConstant(const QString& name) const;
     const EnsightConstant& getConstant(const std::string& name) const;
@@ -308,7 +308,7 @@ public:
 
     /**
      * @brief Get the value of a constant constant by its name.
-     * @param name Constant name
+     * @param[in] name Constant name
      */
     double getConstantValue(const QString& name) const;
     double getConstantValue(const std::string& name) const;
@@ -320,8 +320,8 @@ public:
      * If timestep=-1 the min and max value for all timesteps are calculated.
      * The result is a Nx2 matrix. In the first colums the min and in the second column the max value.
      * N is 1 for 1d variables and 4 for 3d variables. for 3d variables the 4 values are (x,y,z,norm(x,y,z))
-     * @param name Variable name
-     * @param timestep Timestep
+     * @param[in] name Variable name
+     * @param[in] timestep Timestep
      * @return Nx2 matrix
      */
     Matx getVariableBounds(const QString& name, int timestep) const;
@@ -332,13 +332,14 @@ public:
      * @brief Creates the SubdivTree.
      *
      * If the input is in 2D a Quadtree is created. Otherwise, an Octree is created.
-     * @param maxDepth Maximum depth of the SubdivTree
-     * @param maxElements Maximum number of SubdivTree elements
-     * @param partsToExclude The names of the parts to exclude
-     * @param sizeOffset Increases the cell boundaries.
+     * @param[in] maxDepth Maximum depth of the SubdivTree
+     * @param[in] maxElements Maximum number of SubdivTree elements
+     * @param[in] partsToExclude The names of the parts to exclude
+     * @param[in] sizeOffset Increases the cell boundaries.
      */
-    bool createSubdivTree(int maxDepth, int maxElements, const QStringList& partsToExclude,
-                      double sizeOffset = 0.0);
+    bool createSubdivTree(int maxDepth, int maxElements,
+                          const QStringList& partsToExclude,
+                          double sizeOffset = 0.0);
 
 
     /**
@@ -351,22 +352,23 @@ public:
 
     /**
      * @brief Interpolates CFD data
-     * @param pos Position
+     * @param[in] pos Position
      */
     EnsightCellIdentifier* interpolate(const Vec3 & pos);
 
 
     /**
      * @brief Interpolates CFD data
-     * @param pos Position
-     * @param baryCoordOut Barycentric coordinates are used to check if pos is inside cell and can be retrieved here.
+     * @param[in] pos Position
+     * @param[out] baryCoordOut Barycentric coordinates are used to check if pos is inside cell and can be retrieved here.
      */
     EnsightCellIdentifier* interpolate(const Vec3& pos, EnsightBarycentricCoordinates &baryCoordOut);
 
     /**
-     * @brief Prints the whole information defining this Ensight object
+     * @brief Prints the whole information defining this Ensight object to given
+     * stream
      */
-    void print() const;
+    void print(std::ostream& out) const;
 
 
 public:

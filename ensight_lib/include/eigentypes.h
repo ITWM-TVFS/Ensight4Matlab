@@ -24,6 +24,8 @@
 #ifndef EIGENTYPES_H
 #define EIGENTYPES_H
 
+// Define aliases to provide shorter names for commonly used Eigen types.
+
 #include <Eigen/Dense>
 
 using Matx = Eigen::MatrixXd;

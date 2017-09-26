@@ -33,6 +33,11 @@
 class EnsightObj;
 class QString;
 
+/**
+ * This file contains internal functions to read Ensight files in binary format.
+ *
+ * Do not use these directly, but use EnsightLib::readEnsight instead.
+ */
 
 namespace Ensight
 {
@@ -43,11 +48,11 @@ namespace detail
 
 /**
  * @brief Read an Ensight Geometry file from filename.
- * @param ensight The ensight file the loaded geometry is added to
- * @param filename The filename of the Geometry file
- * @param timestep The current timestep in the Ensight object
- * @param readTimeStep The timestep to read from file (-1 for all)
- * @param isTransientSingleFile file is in transient single file format
+ * @param[in, out] ensight The ensight file the loaded geometry is added to
+ * @param[in] filename The filename of the Geometry file
+ * @param[in] timestep The current timestep in the Ensight object
+ * @param[in] readTimeStep The timestep to read from file (-1 for all)
+ * @param[in] isTransientSingleFile file is in transient single file format
  * @return false in case of any errors, otherwise true
  */
 bool readBinaryGeometry(EnsightObj& ensight, const QString& filename,
@@ -57,15 +62,15 @@ bool readBinaryGeometryTimeStep(EnsightObj& ensight, std::ifstream& in, int time
 
 /**
  * @brief Read an Ensight Variable file, MUST be scalar per node or vector per node
- * @param ensight The Ensight object the variable is added to
- * @param filename The filename to read from
- * @param name The name of the variable
- * @param timestep The current timestep in the Ensight object
- * @param readTimeStep The timestep to read from file (-1 for all)
- * @param isTransientSingleFile file is in transient single file format
- * @param type The type of the variable
- * @param dim The dimension of the variable
- * @return  false in case of any errors, otherwise true
+ * @param[in, out] ensight The Ensight object the variable is added to
+ * @param[in] filename The filename to read from
+ * @param[in] name The name of the variable
+ * @param[in] timestep The current timestep in the Ensight object
+ * @param[in] readTimeStep The timestep to read from file (-1 for all)
+ * @param[in] isTransientSingleFile file is in transient single file format
+ * @param[in] type The type of the variable
+ * @param[in] dim The dimension of the variable
+ * @return false in case of any errors, otherwise true
  *
  */
 bool readBinaryVariable(EnsightObj& ensight, const QString& filename,

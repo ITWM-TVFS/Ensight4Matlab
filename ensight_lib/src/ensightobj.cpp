@@ -627,40 +627,39 @@ int EnsightObj::getNumberOfConstants() const
 }
 
 
-void EnsightObj::print() const
+void EnsightObj::print(std::ostream& out) const
 {
     if (edit_)
     {
-        std::cout << "Printing is not supported in Edit mode. Call endEdit() first." << std::endl;
+        out << "Printing is not supported in Edit mode. Call endEdit() first."
+            << std::endl;
         return;
     }
 
-    std::cout << "--------------------------------------------------" << std::endl;
-    std::cout << "--------------------------------------------------" << std::endl;
+    out << "--------------------------------------------------\n";
 
-    std::cout << "-------------------- TIMESTEPS -------------------" << std::endl;
-    std::cout << timesteps_.transpose() << std::endl;
-    std::cout << std::endl;
+    out << "-------------------- TIMESTEPS -------------------\n";
+    out << timesteps_.transpose() << std::endl;
+    out << std::endl;
 
-    std::cout << "-------------------- CONSTANTS -------------------" << std::endl;
+    out << "-------------------- CONSTANTS -------------------\n";
     for (const auto& c : constants_)
     {
-        std::cout << c.getName().toStdString() << " = " << c.getValue() << std::endl;
+        out << c.getName().toStdString() << " = " << c.getValue() << std::endl;
     }
-    std::cout << std::endl;
-    std::cout << "-------------------- VARIABLES -------------------" << std::endl;
+    out << std::endl;
+    out << "-------------------- VARIABLES -------------------\n";
     for (int i = 0; i < getNumberOfVariables(); i++)
     {
         EnsightVariableIdentifier varId = getVariable(i);
-        std::cout << varId.getName().toStdString() << " (dim=" << varId.getDim() << ")" << std::endl;
+        out << varId.getName().toStdString() << " (dim=" << varId.getDim() << ")\n";
     }
 
-    std::cout << std::endl;
-    std::cout << "---------------------- PARTS ---------------------" << std::endl;
+    out << std::endl;
+    out << "---------------------- PARTS ---------------------\n";
     for (const auto& part : parts_)
-        part->print();
+        part->print(out);
 
-    std::cout << "--------------------------------------------------" << std::endl;
-    std::cout << "--------------------------------------------------" << std::endl;
-    std::cout << "--------------------------------------------------" << std::endl;
+    out << "--------------------------------------------------\n";
+    out << "--------------------------------------------------" << std::endl;
 }

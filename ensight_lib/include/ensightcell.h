@@ -24,6 +24,7 @@
 #ifndef ENSIGHTCELL_H
 #define ENSIGHTCELL_H
 
+#include <iosfwd>
 #include <string>
 
 #include <QPair>
@@ -54,12 +55,12 @@ public:
      *
      * For additional information on Cell Types have a look at Ensight::Cell.
      *
-     * @param type Cell type
-     * @param values MxN matrix, with N cells each consisting of M vertices
-     * @param partName Parent part name
+     * @param[in] type Cell type
+     * @param[in] values MxN matrix, with N cells each consisting of M vertices
+     * @param[in] partName Parent part name
      */
-    EnsightCellList(Ensight::Cell type, const Mati& values, QString partName);
-    EnsightCellList(Ensight::Cell type, const Mati& values, std::string partName);
+    EnsightCellList(Ensight::Cell type, const Mati& values, const QString& partName);
+    EnsightCellList(Ensight::Cell type, const Mati& values, const std::string& partName);
 
     /**
      * @brief Get cell type of the elements in the CellList.
@@ -156,11 +157,11 @@ class EnsightCellIdentifier
 public:
     /**
      * @brief Creates an EnsightCellIdentifier based on the given parameters.
-     * @param part Part where this cell originates from
-     * @param cellList Cell list which contains the cell
-     * @param timestep Timestep of the cell
-     * @param index Cell list index of the cell
-     * @param bounds Bounds of the represented cell
+     * @param[in] part Part where this cell originates from
+     * @param[in] cellList Cell list which contains the cell
+     * @param[in] timestep Timestep of the cell
+     * @param[in] index Cell list index of the cell
+     * @param[in] bounds Bounds of the represented cell
      */
     EnsightCellIdentifier(EnsightPart* part, EnsightCellList* cellList, int timestep,
                           int index, const Bbox& bounds);
@@ -199,18 +200,21 @@ public:
      */
     int getIndex() const;
 
-    void print() const;
+    /**
+     * @brief Print representation to given stream
+     */
+    void print(std::ostream& out) const;
 
     /**
      * @brief Checks if pos is contained in current cell, by computing barycentric coordinates.
      */
-    bool contains(const Vec3 &pos, bool ignore2dCells = true) const;
+    bool contains(const Vec3& pos, bool ignore2dCells = true) const;
 
     /**
      * @brief Checks if pos is contained in current cell, by computing barycentric coordinates.
-     * @param pos Position
-     * @param baryCoordOut Barycentric coordinates can be retrieved here.
-     * @param ignore2dCells ignore 2D cells. Use this for 3D geometry where only
+     * @param[in] pos Position
+     * @param[out] baryCoordOut Barycentric coordinates can be retrieved here.
+     * @param[in] ignore2dCells ignore 2D cells. Use this for 3D geometry where only
      * volumetric cells should be considered as containing a point.
      */
     bool contains(const Vec3& pos, EnsightBarycentricCoordinates& baryCoordOut,

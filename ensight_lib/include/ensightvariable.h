@@ -40,8 +40,8 @@ public:
     EnsightVariableIdentifier();
     /**
      * @brief Creates an EnsightVariableIdentifier.
-     * @param name Variable name
-     * @param varType Variable type (See Ensight::VarTypes)
+     * @param[in] name Variable name
+     * @param[in] varType Variable type (See Ensight::VarTypes)
      */
     EnsightVariableIdentifier(const QString& name, Ensight::VarTypes varType);
     EnsightVariableIdentifier(const std::string& name, Ensight::VarTypes varType);
@@ -77,8 +77,8 @@ class EnsightVariable : public EnsightVariableIdentifier
 public:
     /**
      * @brief Creates an EnsightVariable.
-     * @param name Variable name
-     * @param varType Variable type (See Ensight::VarTypes)
+     * @param[in] name Variable name
+     * @param[in] varType Variable type (See Ensight::VarTypes)
      */
     EnsightVariable(const QString& name, Ensight::VarTypes varType);
     EnsightVariable(const std::string& name, Ensight::VarTypes varType);
@@ -88,7 +88,7 @@ public:
      * For 3D variables the input is a 4xN matrix where N is the number of nodes.
      * The four values are x,y,z and norm of (x,y,z).
      * For 1D variables the input is a 1xN mattrix.
-     * @param newValues Value matrix
+     * @param[in] newValues Value matrix
      */
     void setValues(const Matx& newValues);
     const Matx& getValues() const;

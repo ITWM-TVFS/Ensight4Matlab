@@ -32,7 +32,8 @@ EnsightBarycentricCoordinates::EnsightBarycentricCoordinates()
     baryCoords_.setZero();
 }
 
-EnsightBarycentricCoordinates::EnsightBarycentricCoordinates(const Vec3& pos, EnsightCellIdentifier* cell)
+EnsightBarycentricCoordinates::EnsightBarycentricCoordinates(
+    const Vec3& pos, const EnsightCellIdentifier* cell)
 {
     compute(pos, cell);
 }
@@ -101,12 +102,12 @@ bool EnsightBarycentricCoordinates::computeIsInside()
     return true;
 }
 
-bool EnsightBarycentricCoordinates::isValid()
+bool EnsightBarycentricCoordinates::isValid() const
 {
     return isComputationSuccessful_;
 }
 
-Vecx EnsightBarycentricCoordinates::evaluate(const QString &name)
+Vecx EnsightBarycentricCoordinates::evaluate(const QString& name) const
 {
     if (!cell_)
         return Vecx();
@@ -114,7 +115,7 @@ Vecx EnsightBarycentricCoordinates::evaluate(const QString &name)
     return evaluate(data);
 }
 
-Vecx EnsightBarycentricCoordinates::evaluate(const std::string &name)
+Vecx EnsightBarycentricCoordinates::evaluate(const std::string& name) const
 {
     if (!cell_)
         return Vecx();
@@ -122,7 +123,7 @@ Vecx EnsightBarycentricCoordinates::evaluate(const std::string &name)
     return evaluate(data);
 }
 
-Vecx EnsightBarycentricCoordinates::evaluate(const Matx &data)
+Vecx EnsightBarycentricCoordinates::evaluate(const Matx &data) const
 {
     Vecx value(data.rows());
     value.setZero();
@@ -143,8 +144,8 @@ Vecx EnsightBarycentricCoordinates::evaluate(const Matx &data)
     return value;
 }
 
-Vecx EnsightBarycentricCoordinates::evaluateUnsteady(EnsightBarycentricCoordinates &localCoord0,
-                                                     EnsightBarycentricCoordinates &localCoord1,
+Vecx EnsightBarycentricCoordinates::evaluateUnsteady(const EnsightBarycentricCoordinates& localCoord0,
+                                                     const EnsightBarycentricCoordinates& localCoord1,
                                                      double t0, double t1, double tCurrent,
                                                      const QString &name)
 {
@@ -188,12 +189,13 @@ Vecx EnsightBarycentricCoordinates::evaluateUnsteady(EnsightBarycentricCoordinat
     return value;
 }
 
-Vecx EnsightBarycentricCoordinates::evaluateUnsteady(EnsightBarycentricCoordinates &localCoord0,
-                                                     EnsightBarycentricCoordinates &localCoord1,
-                                                     double t0, double t1, double tCurrent,
-                                                     const std::string& name)
+Vecx EnsightBarycentricCoordinates::evaluateUnsteady(
+    const EnsightBarycentricCoordinates& localCoord0,
+    const EnsightBarycentricCoordinates& localCoord1, double t0, double t1,
+    double tCurrent, const std::string& name)
 {
-    return evaluateUnsteady(localCoord0, localCoord1, t0, t1, tCurrent, QString::fromStdString(name));
+    return evaluateUnsteady(localCoord0, localCoord1, t0, t1, tCurrent,
+                            QString::fromStdString(name));
 }
 
 Vecx EnsightBarycentricCoordinates::getCoords() const
@@ -221,7 +223,7 @@ bool EnsightBarycentricCoordinates::isBarycentricInterpolation()
 
 void EnsightBarycentricCoordinates::computeTetraCell(const Vec3& pos,
                                                      const EnsightCellIdentifier* cell,
-                                                     Veci& iLocalSubNodes)
+                                                     const Veci& iLocalSubNodes)
 {
     const Veci& iNodes = cell->getCell();
 
@@ -248,7 +250,7 @@ void EnsightBarycentricCoordinates::computeTetraCell(const Vec3& pos,
 
 void EnsightBarycentricCoordinates::computePyramidCell(const Vec3& pos,
                                                        const EnsightCellIdentifier* cell,
-                                                       Veci& iLocalSubNodes)
+                                                       const Veci& iLocalSubNodes)
 {
     const Veci& iNodes = cell->getCell();
 
@@ -275,9 +277,9 @@ void EnsightBarycentricCoordinates::computePyramidCell(const Vec3& pos,
     computeTetraCell(pos, cell, iLocalSubNodesNew);
 }
 
-void EnsightBarycentricCoordinates::computeWedgeCell(const Vec3 &pos,
-                                                     const EnsightCellIdentifier *cell,
-                                                     Veci &iLocalSubNodes)
+void EnsightBarycentricCoordinates::computeWedgeCell(const Vec3& pos,
+                                                     const EnsightCellIdentifier* cell,
+                                                     const Veci& iLocalSubNodes)
 {
     const Veci& iNodes = cell->getCell();
 
@@ -314,9 +316,9 @@ void EnsightBarycentricCoordinates::computeWedgeCell(const Vec3 &pos,
         computePyramidCell(pos, cell, iLocalSubNodesNew);
 }
 
-void EnsightBarycentricCoordinates::computeHexaCell(const Vec3 &pos,
-                                                    const EnsightCellIdentifier *cell,
-                                                    Veci &iLocalSubNodes)
+void EnsightBarycentricCoordinates::computeHexaCell(const Vec3& pos,
+                                                    const EnsightCellIdentifier* cell,
+                                                    const Veci& iLocalSubNodes)
 {
     const Veci &iNodes = cell->getCell();
 
@@ -374,7 +376,9 @@ void EnsightBarycentricCoordinates::computeHexaCell(const Vec3 &pos,
         computePyramidCell(pos, cell, iLocalSubNodesNew);
 }
 
-void EnsightBarycentricCoordinates::computeTriCell(const Vec3 &pos, const EnsightCellIdentifier *cell, Veci &iLocalSubNodes)
+void EnsightBarycentricCoordinates::computeTriCell(const Vec3& pos,
+                                                   const EnsightCellIdentifier* cell,
+                                                   const Veci& iLocalSubNodes)
 {
     const Veci &iNodes = cell->getCell();
 
@@ -399,7 +403,9 @@ void EnsightBarycentricCoordinates::computeTriCell(const Vec3 &pos, const Ensigh
                                          - baryCoords_(iLocalSubNodes(2));
 }
 
-void EnsightBarycentricCoordinates::computeQuadCell(const Vec3 &pos, const EnsightCellIdentifier *cell, Veci &iLocalSubNodes)
+void EnsightBarycentricCoordinates::computeQuadCell(const Vec3& pos,
+                                                    const EnsightCellIdentifier* cell,
+                                                    const Veci& iLocalSubNodes)
 {
     const Veci& iNodes = cell->getCell();
 
@@ -430,7 +436,7 @@ void EnsightBarycentricCoordinates::computeQuadCell(const Vec3 &pos, const Ensig
 bool EnsightBarycentricCoordinates::isOnSameSideOfSplitPlane(const Vec3& pos,
                                                              int iNodeSideSpecifier,
                                                              const EnsightCellIdentifier* cell,
-                                                             Vec3i& iSplitNodes)
+                                                             const Vec3i& iSplitNodes)
 {
     Vec3 v0 = cell->getVertex(iSplitNodes(0));
     Vec3 v1 = cell->getVertex(iSplitNodes(1));
@@ -444,10 +450,10 @@ bool EnsightBarycentricCoordinates::isOnSameSideOfSplitPlane(const Vec3& pos,
     return (n.dot(pos-v0) >= 0) == (n.dot(vSideSpecifier-v0) >= 0);
 }
 
-bool EnsightBarycentricCoordinates::isOnSameSideOfSplitLine(const Vec3 &pos,
+bool EnsightBarycentricCoordinates::isOnSameSideOfSplitLine(const Vec3& pos,
                                                             int iNodeSideSpecifier,
-                                                            const EnsightCellIdentifier *cell,
-                                                            Vec2i &iSplitNodes)
+                                                            const EnsightCellIdentifier* cell,
+                                                            const Vec2i& iSplitNodes)
 {
     Vec3 v0 = cell->getVertex(iSplitNodes(0));
     Vec3 v1 = cell->getVertex(iSplitNodes(1));

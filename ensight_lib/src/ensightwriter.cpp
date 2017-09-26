@@ -33,6 +33,8 @@
 #include "../include/ensightobj.h"
 #include "../include/ensightvariable.h"
 
+using namespace Ensight::Writer::detail;
+
 namespace Ensight
 {
 namespace Writer
@@ -58,13 +60,13 @@ bool write(EnsightObj* ensight, const QString& filename, bool binary, int timest
     // Case file is only written in if timestep==0 or timestep==-1
     // timestep==0  => write first time step
     // timestep==-1 => write all time steps
-    if (timestep == 0 || timestep == -1)
+    if (timestep <= 0)
         if (!writeCase(ensight, name, filename))
             return false;
 
     if (binary)
-        return EnsightBinaryWriter::writeBinary(ensight, name, path, timestep);
-    return EnsightAsciiWriter::writeAscii(ensight, name, path, timestep);
+        return writeBinary(ensight, name, path, timestep);
+    return writeAscii(ensight, name, path, timestep);
 }
 
 bool write(EnsightObj *ensight, const std::string &filename, bool binary, int timestep)

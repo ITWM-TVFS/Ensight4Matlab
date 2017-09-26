@@ -30,23 +30,36 @@ class EnsightObj;
 class QString;
 
 /**
- * @brief   Methods to write an Ensight case file with corresponding geometry and variable files in Ensight Gold Binary format
+ * This file contains internal functions to write Ensight files in binary format.
+ *
+ * Do not use these directly, but use EnsightLib::writeEnsight instead.
  */
-class EnsightBinaryWriter
+
+namespace Ensight
 {
-public:
-    /**
-     * @brief Writes an Ensight case file with corresponding geometry and variable files based on a given Ensight object.
-     * @param ensight Ensight Object
-     * @param name Case file name
-     * @param path File path
-     * @param timestep Timestep
-     */
-    static bool writeBinary(EnsightObj* ensight, const QString& name, const QString& path, int timestep);
-private:
-    static bool writeBinaryGeo(EnsightObj* ensight, const QString& name, const QString& path, int timestep);
-    static bool writeBinaryVar(EnsightObj* ensight, const QString& name, const QString& var,
-                               const QString& path, int timestep, int dim);
-};
+namespace Writer
+{
+namespace detail
+{
+/**
+ * @brief Writes an Ensight file with corresponding geometry and variable files
+ * based on a given Ensight object.
+ * @param[in] ensight Ensight Object
+ * @param[in] name Case file name
+ * @param[in] path File path
+ * @param[in] timestep Timestep (-1 for all)
+ */
+bool writeBinary(EnsightObj* ensight, const QString& name, const QString& path,
+                 int timestep);
+
+bool writeBinaryGeo(EnsightObj* ensight, const QString& name,
+                    const QString& path, int timestep);
+bool writeBinaryVar(EnsightObj* ensight, const QString& name,
+                    const QString& var, const QString& path, int timestep,
+                    int dim);
+
+}
+}
+}
 
 #endif // ENSIGHTBINARYWRITER_H

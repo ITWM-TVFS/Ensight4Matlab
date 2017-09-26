@@ -34,13 +34,24 @@ class QString;
 
 namespace Ensight
 {
-/**
- * @namespace Ensight::Writer
- * @brief Namespace Writer
- */
 namespace Writer
 {
 
+/**
+ * @brief Writes an EnsightObj to EnSight Gold format
+ * @param[in] ensight The EnsightObj to write
+ * @param[in] filename The name of the ".case" file to write. Names of other
+ * files of the data set, e.g. geometry files, are deduced from this.
+ * @param[in] binary Write file in binary or ASCII format.
+ * @param[in] timestep Optionally write only a single time step. This is
+ * useful for incrementally creating data sets during a long running
+ * computation, i.e. sequentially writing individual time steps as they are
+ * computed. The .case file is only written when the first time step
+ * (timestep=0) is written, otherwise only the corresponding geometry and
+ * variable files are written.
+ * The default argument of -1 writes the entire data set, i.e. .case file
+ * and data files for all time steps.
+ */
 bool write(EnsightObj* ensight, const QString& filename, bool binary, int timestep = -1);
 bool write(EnsightObj* ensight, const std::string& filename, bool binary, int timestep = -1);
 

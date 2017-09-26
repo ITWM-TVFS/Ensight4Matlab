@@ -31,45 +31,58 @@
 #include "../include/ensightvariable.h"
 
 
-bool EnsightAsciiWriter::writeAscii(EnsightObj *ensight, const QString &name, const QString &path, int timestep)
+namespace Ensight
 {
-    if(timestep==-1)
+namespace Writer
+{
+namespace detail
+{
+
+bool writeAscii(EnsightObj* ensight, const QString& name, const QString& path,
+                int timestep)
+{
+    if (timestep < 0)
     {
-        for(int i=0;i<ensight->getNumberOfTimesteps();i++)
-            if(!writeAsciiGeo(ensight, name, path, i)) return false;
+        for (int i = 0; i < ensight->getNumberOfTimesteps(); i++)
+            if (!writeAsciiGeo(ensight, name, path, i))
+                return false;
     }
     else
     {
-        if(!writeAsciiGeo(ensight, name, path, timestep)) return false;
+        if (!writeAsciiGeo(ensight, name, path, timestep))
+            return false;
     }
 
-    for(int i=0;i<ensight->getNumberOfVariables();i++)
+    for (int i = 0; i < ensight->getNumberOfVariables(); i++)
     {
         EnsightVariableIdentifier var = ensight->getVariable(i);
 
-        if(timestep==-1)
+        if (timestep < 0)
         {
-            for(int j=0;j<ensight->getNumberOfTimesteps();j++)
+            for (int j = 0; j < ensight->getNumberOfTimesteps(); j++)
             {
-                if(!writeAsciiVar(ensight, name, var.getName(), path, j, var.getDim()))
+                if (!writeAsciiVar(ensight, name, var.getName(), path, j,
+                                   var.getDim()))
                     return false;
             }
         }
         else
         {
-            if(!writeAsciiVar(ensight, name, var.getName(), path, timestep, var.getDim()))
+            if (!writeAsciiVar(ensight, name, var.getName(), path, timestep,
+                               var.getDim()))
                 return false;
         }
     }
     return true;
 }
 
-bool EnsightAsciiWriter::writeAsciiVar(EnsightObj *ensight, const QString &name, const QString &var, const QString &path, int timestep, int dim)
+bool writeAsciiVar(EnsightObj* ensight, const QString& name, const QString& var,
+                   const QString& path, int timestep, int dim)
 {
     QString filename = QString("%0/%1.%2").arg(path).arg(name).arg(var);
 
     // For more than one timestep add timestep at end of filename
-    if(ensight->isTransient())
+    if (ensight->isTransient())
     {
         int wildcards = log10(double(ensight->getNumberOfTimesteps()))+1;
         filename.append(QString("%0").arg(timestep, wildcards, 10, QLatin1Char('0')));
@@ -78,7 +91,9 @@ bool EnsightAsciiWriter::writeAsciiVar(EnsightObj *ensight, const QString &name,
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        EnsightObj::ERROR_STR  = ("ERROR IN [writeAsciiVar()] Unable to open file <" + file.fileName() + ">");
+        EnsightObj::ERROR_STR =
+            "ERROR in [writeAsciiVar()] Unable to open file <" +
+            file.fileName() + ">";
         return false;
     }
 
@@ -86,31 +101,31 @@ bool EnsightAsciiWriter::writeAsciiVar(EnsightObj *ensight, const QString &name,
 
     out << "description line 1\n";
 
-    for(int i=0;i<ensight->getNumberOfParts();i++)
+    for (int i = 0; i < ensight->getNumberOfParts(); i++)
     {
-        EnsightPart *part = ensight->getPart(i);
-        if(!part->hasVariable(var, timestep))
+        EnsightPart* part = ensight->getPart(i);
+        if (!part->hasVariable(var, timestep))
             continue;
         out << "part\n";
         out << QString("%0\n").arg(part->getId(), 10, 10, QLatin1Char(' '));
         out << "coordinates\n";
         // Write variable values for each node
         Matx values = part->getVariableValues(var, timestep);
-        for(int j=0;j<dim;j++)
-            for(int k=0;k<values.cols();k++)
-                out << QString("%0\n").arg(values(j,k), 12, 'e', 5, ' ');
+        for (int j = 0; j < dim; j++)
+            for (int k = 0; k < values.cols(); k++)
+                out << QString("%0\n").arg(values(j, k), 12, 'e', 5, ' ');
     }
     file.close();
     return true;
-
 }
 
-bool EnsightAsciiWriter::writeAsciiGeo(EnsightObj *ensight, const QString &name, const QString &path, int timestep)
+bool writeAsciiGeo(EnsightObj* ensight, const QString& name,
+                   const QString& path, int timestep)
 {
     QString filename = QString("%0/%1%2").arg(path).arg(name).arg(".geo");
 
     // For more than one timestep add timestep at end of filename
-    if(ensight->isTransient())
+    if (ensight->isTransient())
     {
         int wildcards = log10(double(ensight->getNumberOfTimesteps()))+1;
         filename.append(QString("%0").arg(timestep, wildcards, 10, QLatin1Char('0')));
@@ -120,7 +135,9 @@ bool EnsightAsciiWriter::writeAsciiGeo(EnsightObj *ensight, const QString &name,
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        EnsightObj::ERROR_STR = ("ERROR IN [writeAsciiGeo()] Unable to open file <" + file.fileName() + ">");
+        EnsightObj::ERROR_STR =
+            "ERROR IN [writeAsciiGeo()] Unable to open file <" +
+            file.fileName() + ">";
         return false;
     }
 
@@ -132,14 +149,14 @@ bool EnsightAsciiWriter::writeAsciiGeo(EnsightObj *ensight, const QString &name,
     out << "element id assign\n";
     // extents
 
-    for(int i=0;i<ensight->getNumberOfParts();i++)
+    for (int i = 0; i < ensight->getNumberOfParts(); i++)
     {
         EnsightPart *part = ensight->getPart(i);
         out << "part\n";
         out << QString("%0\n").arg(part->getId(), 10, 10, QLatin1Char(' '));
         out << part->getName() << "\n";
 
-        if(part->getVertexCount(timestep)>0)
+        if (part->getVertexCount(timestep) > 0)
         {
             out << "coordinates\n";
 
@@ -150,13 +167,13 @@ bool EnsightAsciiWriter::writeAsciiGeo(EnsightObj *ensight, const QString &name,
             out << QString("%0\n").arg(vertices.cols(), 10, 10, QLatin1Char(' '));
 
             // Write vertices
-            for(int j=0;j<vertices.rows();j++)
-                for(int k=0;k<vertices.cols();k++)
-                    out << QString("%0\n").arg(vertices(j,k), 12, 'e', 5, ' ');
+            for (int j = 0; j < vertices.rows(); j++)
+                for (int k = 0; k < vertices.cols(); k++)
+                    out << QString("%0\n").arg(vertices(j, k), 12, 'e', 5, ' ');
 
             // Cells
             QList<EnsightCellList*> cells = part->getCells(timestep);
-            for (auto cell: cells)
+            for (auto cell : cells)
             {
                 Ensight::Cell type = cell->getType();
                 Mati values = cell->getValues();
@@ -164,11 +181,12 @@ bool EnsightAsciiWriter::writeAsciiGeo(EnsightObj *ensight, const QString &name,
                 // Write cell type
                 out << Ensight::strCell[type] << "\n";
                 out << QString("%0\n").arg(values.cols(), 10, 10, QLatin1Char(' '));
-                for(int j=0;j<values.cols();j++)
+                for (int j = 0; j < values.cols(); j++)
                 {
                     // Write vertex indices defining cells
-                    for(int k=0;k<values.rows();k++)
-                        out << QString("%0").arg(values(k,j)+1, 10,10,QLatin1Char(' '));
+                    for (int k = 0; k < values.rows(); k++)
+                        out << QString("%0").arg(values(k, j) + 1, 10, 10,
+                                                 QLatin1Char(' '));
                     out << "\n";
                 }
             }
@@ -177,3 +195,7 @@ bool EnsightAsciiWriter::writeAsciiGeo(EnsightObj *ensight, const QString &name,
     file.close();
     return true;
 }
+
+} // namespace detail
+} // namespace Writer
+} // namespace Ensight

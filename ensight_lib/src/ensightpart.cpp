@@ -32,14 +32,14 @@
 using std::unique_ptr;
 using std::make_pair;
 
-EnsightPart::EnsightPart(QString name, int id, int timesteps) :
+EnsightPart::EnsightPart(const QString& name, int id, int timesteps) :
     name_(name), id_(id), timesteps_(timesteps)
 {
     vertices_.resize(timesteps);
     bounds_.resize(timesteps);
 }
 
-EnsightPart::EnsightPart(std::string name, int id, int timesteps) :
+EnsightPart::EnsightPart(const std::string& name, int id, int timesteps) :
     name_(QString::fromStdString(name)), id_(id), timesteps_(timesteps)
 {
     vertices_.resize(timesteps);
@@ -239,32 +239,32 @@ Bbox EnsightPart::getGeometryBounds(int timestep) const
 }
 
 
-void EnsightPart::print() const
+void EnsightPart::print(std::ostream& out) const
 {
-    std::cout << "Part " << name_.toStdString() << ",  id=" << id_ << std::endl;
-    std::cout << ":::::::::::::::::::: VERTICES ::::::::::::::::::::" << std::endl;
+    out << "Part " << name_.toStdString() << ",  id=" << id_ << "\n";
+    out << ":::::::::::::::::::: VERTICES ::::::::::::::::::::\n";
     for (int i = 0; i < vertices_.size(); i++)
-        std::cout << "::::::::::::::::::::   T=" << i << "    ::::::::::::::::::::\n"
-                  << vertices_[i] << std::endl;
-    std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
-    std::cout << ":::::::::::::::::::::: CELLS :::::::::::::::::::::" << std::endl;
+        out << "::::::::::::::::::::   T=" << i << "    ::::::::::::::::::::\n"
+            << vertices_[i] << "\n";
+    out << "::::::::::::::::::::::::::::::::::::::::::::::::::\n";
+    out << ":::::::::::::::::::::: CELLS :::::::::::::::::::::\n";
     for (int i = 0; i < getNumberOfTimesteps(); i++)
     {
-        std::cout << "::::::::::::::::::::   T=" << i << "    ::::::::::::::::::::" << std::endl;
+        out << "::::::::::::::::::::   T=" << i << "    ::::::::::::::::::::\n";
         auto crange = cells_.equal_range(i);
         for (auto it = crange.first; it != crange.second; ++it)
         {
-            std::cout << "Cells: " << Ensight::strCell[it->second->getType()] << "\n"
-                      << it->second->getValues() << std::endl;
+            out << "Cells: " << Ensight::strCell[it->second->getType()] << "\n"
+                << it->second->getValues() << "\n";
         }
 
         auto vrange = variables_.equal_range(i);
         for (auto it = vrange.first; it != vrange.second; ++it)
         {
             const EnsightVariable& var = *it->second;
-            std::cout << "Variables: " << var.getName().toStdString() << "\n"
-                      << var.getValues() << std::endl;
+            out << "Variables: " << var.getName().toStdString() << "\n"
+                << var.getValues() << "\n";
         }
     }
-    std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
+    out << "::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
 }

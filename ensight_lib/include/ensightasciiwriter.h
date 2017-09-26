@@ -30,24 +30,35 @@ class EnsightObj;
 class QString;
 
 /**
- * @brief The EnsightAsciiWriter class provides methods to write an Ensight case file with corresponding geometry and variable files
- * in Ensight Gold Ascii format.
+ * This file contains internal functions to write Ensight files in ASCII format.
+ *
+ * Do not use these directly, but use EnsightLib::writeEnsight instead.
  */
-class EnsightAsciiWriter
-{
-public:
-    /**
-     * @brief Writes an Ensight case file with corresponding geometry and variable files based on a given Ensight object.
-     * @param ensight Ensight object
-     * @param name Case file name
-     * @param path File path
-     * @param timestep Timestep
-     */
-    static bool writeAscii(EnsightObj* ensight, const QString& name, const QString& path, int timestep);
 
-private:
-    static bool writeAsciiGeo(EnsightObj* ensight, const QString& name, const QString& path, int timestep);
-    static bool writeAsciiVar(EnsightObj* ensight, const QString& name, const QString& var, const QString& path, int timestep, int dim);
-};
+namespace Ensight
+{
+namespace Writer
+{
+namespace detail
+{
+
+/**
+ * @brief Writes an Ensight file with corresponding geometry and variable files
+ * based on a given Ensight object.
+ * @param[in] ensight Ensight object
+ * @param[in] name Case file name
+ * @param[in] path File path
+ * @param[in] timestep Timestep (-1 for all)
+ */
+bool writeAscii(EnsightObj* ensight, const QString& name, const QString& path,
+                int timestep);
+
+bool writeAsciiGeo(EnsightObj* ensight, const QString& name,
+                   const QString& path, int timestep);
+bool writeAsciiVar(EnsightObj* ensight, const QString& name, const QString& var,
+                   const QString& path, int timestep, int dim);
+}
+}
+}
 
 #endif // ENSIGHTASCIIWRITER_H

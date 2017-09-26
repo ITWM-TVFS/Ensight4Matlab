@@ -53,9 +53,4 @@ const char* strVarTypes[] = {"constant per case", "scalar per node",
                              "vector per node"};
 const int varTypeDims[] = {1, 1, 3};
 
-// supported time formats
-const char* strTimeSetDef[] = {"time set", "number of steps",
-                               "filename start number", "filename increment",
-                               "time values"};
-
 } // namespace Ensight

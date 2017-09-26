@@ -24,6 +24,7 @@
 #ifndef ENSIGHTPART_H
 #define ENSIGHTPART_H
 
+#include <iosfwd>
 #include <map>
 #include <memory>
 #include <string>
@@ -44,8 +45,8 @@ class EnsightVariable;
 class EnsightPart
 {
 public:
-    EnsightPart(QString name, int id, int timesteps);
-    EnsightPart(std::string name, int id, int timesteps);
+    EnsightPart(const QString& name, int id, int timesteps);
+    EnsightPart(const std::string& name, int id, int timesteps);
     ~EnsightPart();
 
 
@@ -54,12 +55,12 @@ public:
 
     /**
      * @brief Deletes data for the given step
-     * @param step Timestep
+     * @param[in] step Timestep
      */
     void clean(int step);
     /**
      * @brief Set number of timesteps.
-     * @param timesteps
+     * @param[in] timesteps
      */
     void setTimeSteps(int timesteps);
     /**
@@ -68,26 +69,30 @@ public:
     int getNumberOfTimesteps() const;
     /**
      * @brief Sets the vertices and boundaries at a given timestep
-     * @param vertices A 3xN matrix containing N 3D vertices
-     * @param timestep Timestep
+     * @param[in] vertices A 3xN matrix containing N 3D vertices
+     * @param[in] timestep Timestep
      */
     void setVertices(const Matx& vertices, int timestep);
-    void print() const;
+
+    /**
+     * @brief Print representation to given stream
+     */
+    void print(std::ostream& out) const;
     /**
      * @brief Get the number of vertices at a given timestep
-     * @param timestep Timestep
+     * @param[in] timestep Timestep
      */
     int getVertexCount(int timestep) const;
     /**
      * @brief Get all vertices at a given timestep
-     * @param timestep Timestep
+     * @param[in] timestep Timestep
      * @return a 3xN matrix containing N 3D vertices.
      */
     const Matx& getVertices(int timestep) const;
 
     /**
      * @brief Get the geometric bounds of this part.
-     * @param timestep The timestep for which the bounds are determined
+     * @param[in] timestep The timestep for which the bounds are determined
      * @return the geometric bounds as a BBox.
      *
      * For timestep==-1 the geometric bounds of all timesteps are computed.
@@ -96,63 +101,63 @@ public:
 
     /**
      * @brief Checks if the Ensight part contains the given cell type at timestep
-     * @param timestep Timestep
-     * @param c Cell Type (See Ensight::Cell)
+     * @param[in] timestep Timestep
+     * @param[in] c Cell Type (See Ensight::Cell)
      */
     bool hasCellType(int timestep, Ensight::Cell c) const;
     /**
      * @brief Set cells of cell type 'type' at timestep
-     * @param values Cell values
-     * @param timestep Timestep
-     * @param type Cell Type (See Ensight::Cell)
+     * @param[in] values Cell values
+     * @param[in] timestep Timestep
+     * @param[in] type Cell Type (See Ensight::Cell)
      */
     void setCells(const Mati& values, int timestep, Ensight::Cell type);
     /**
      * @brief Get cells (of all types) at a given timestep
-     * @param timestep Timestep
+     * @param[in] timestep Timestep
      * @return a QList of EnsightCellLists containing all cells of the same cell type.
      */
     QList<EnsightCellList*> getCells(int timestep);
     /**
      * @brief Get cells (of a certain type) at a given timestep
-     * @param timestep Timestep
-     * @param type Cell type (See Ensight::Cell)
+     * @param[in] timestep Timestep
+     * @param[in] type Cell type (See Ensight::Cell)
      * @return a EnsightCellList containing all cell of a certain cell type.
      */
     EnsightCellList* getCells(int timestep, Ensight::Cell type);
     /**
      * @brief Get the BBox of cell at a given timestep
-     * @param cell Cell
+     * @param[in] cell Cell
      * @param timestep Timestep
      */
     Bbox getCellBounds(const Veci& cell, int timestep) const;
     /**
      * @brief Sets the values of a variable at a given timestep
-     * @param name Variable name
-     * @param values Value matrix
-     * @param type Variable type (See Ensight::VarTypes)
-     * @param timestep Timestep
+     * @param[in] name Variable name
+     * @param[in] values Value matrix
+     * @param[in] type Variable type (See Ensight::VarTypes)
+     * @param[in] timestep Timestep
      */
     void setVariable(const QString& name, const Matx& values, Ensight::VarTypes type, int timestep);
     void setVariable(const std::string& name, const Matx& values, Ensight::VarTypes type, int timestep);
     /**
      * @brief Checks if the Ensight part contains a variable at a given timestep
-     * @param name Variable name
-     * @param timestep Timestep
+     * @param[in] name Variable name
+     * @param[in] timestep Timestep
      */
     bool hasVariable(const QString& name, int timestep) const;
     bool hasVariable(const std::string& name, int timestep) const;
     /**
      * @brief Get the value matrix of a variable at a given timestep
-     * @param name Variable name
-     * @param timestep Timestep
+     * @param[in] name Variable name
+     * @param[in] timestep Timestep
      */
     const Matx& getVariableValues(const QString& name, int timestep);
     const Matx& getVariableValues(const std::string& name, int timestep);
     /**
      * @brief Get the EnsightVariable class of a variable by its name
-     * @param name Variable name
-     * @param timestep Timestep
+     * @param[in] name Variable name
+     * @param[in] timestep Timestep
      */
     EnsightVariable* getVariable(const QString& name, int timestep);
     EnsightVariable* getVariable(const std::string& name, int timestep);
@@ -162,8 +167,8 @@ public:
      * If timestep is <0 the function will return the combined boundaries over
      * all timesteps.
      * By setting timestep to 0 or >0, you can get the boundaries of a certain timestep.
-     * @param name Variable name
-     * @param timestep Timestep
+     * @param[in] name Variable name
+     * @param[in] timestep Timestep
      */
     Matx getVariableBounds(const QString& name, int timestep);
     Matx getVariableBounds(const std::string& name, int timestep);

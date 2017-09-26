@@ -35,17 +35,48 @@
 
 class EnsightObj;
 
+/**
+ * @brief The EnsightCase class represents the case file of an Ensight data set
+ *
+ * In most cases you do not need to explicitly use this class as it is used
+ * internally by Ensight::Reader::read to parse the case file
+ * before parsing the remaining files of the data set.
+ * However, for advanced scenarios, this class can be used to explicitly load
+ * the case file to only parse the structure of the data set. For example, if
+ * you only want to load the last time step of a data set, you can parse the
+ * case file using this class to find out the number of time steps.
+ */
 class EnsightCase
 {
 public:
+    /**
+     * @brief Construct an EnsightCase object with no associated file name.
+     */
     EnsightCase();
+    /**
+     * @brief Construct an EnsightCase object and associate it with the given
+     * file name
+     * @param[in] fileName The name of the case file to parse when readCaseFile
+     * is called
+     */
     EnsightCase(const QString& fileName);
     EnsightCase(const std::string& fileName);
 
+    /**
+     * @brief reads the associated case file
+     */
     bool readCaseFile();
+    /**
+     * @brief Sets the file name of the file to be read
+     * @param[in] fileName The file name to be read
+     */
     void setMasterFileName(const QString& fileName);
     void setMasterFileName(const std::string& fileName);
 
+    /**
+     * @brief Given a time step returns the data file number corresponding to
+     * this time step
+     */
     int getFileNumberForStep(int step) const;
 
     // Case file name
@@ -79,16 +110,9 @@ public:
     int filesetSteps;
 };
 
-/**
- * @namespace Ensight
- * @brief Namespace Ensight
- */
+
 namespace Ensight
 {
-/**
- * @namespace Ensight::Reader
- * @brief Namespace Reader
- */
 namespace Reader
 {
 
@@ -107,8 +131,8 @@ namespace Reader
  * - TIME: Only on time set. This time set must have ID 1
  * - GEOMETRY: Only <model> is supported
  *
- * @param filename The case file to read
- * @param timestep A specific time step to read or -1 to read all time steps
+ * @param[in] filename The case file to read
+ * @param[in] timestep A specific time step to read or -1 to read all time steps
  * @return a pointer to an EnsightObj or NULL in case of an error.
  *
  */
@@ -127,8 +151,8 @@ namespace detail
     /**
      * @brief Checks if the specified filename has a correct definition of
      * wildcards and if enough wildcards are available for timestep.
-     * @param filename
-     * @param timestep
+     * @param[in] filename
+     * @param[in] timestep
      */
     bool checkWildcards(const QString& filename, int timestep);
 

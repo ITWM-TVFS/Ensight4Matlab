@@ -44,8 +44,8 @@ public:
     EnsightConstant();
     /**
      * @brief Creates an EnsightConstant with given name and value.
-     * @param name Constant name
-     * @param value Constant value
+     * @param[in] name Constant name
+     * @param[in] value Constant value
      */
     EnsightConstant(const QString& name, double value);
     EnsightConstant(const std::string& name, double value);
