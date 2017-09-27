@@ -13,6 +13,7 @@ Table of Contents
   * [Installation](#installation)
     * [Requirements](#requirements)
     * [Building the EnsightLib C++ library](#building-the-ensightlib-c-library)
+    * [Installing the library](#installing-the-library)
     * [Building the MATLAB interface](#building-the-matlab-interface)
   * [Usage](#usage)
     * [Overview](#overview)
@@ -62,12 +63,25 @@ You can also edit the .pro file to compile a static library (instead of an .so) 
 CONFIG += staticlib
 ```
 
-Building the MATLAB interface
------------------------------
-To build the MATLAB interface, you need to make sure MATLAB can find the EnsightLib library. For this, you can either build the library as described above and copy it to a location in the global library search path, or use it from a local directory by specifying the `LD_LIBRARY_PATH` environment variable (Linux systems). For example, if the path to your compiled library is `/home/USER/Ensight4Matlab/ensight_lib/lib/libEnsightLib.so`, you would set the following:
+Installing the library
+----------------------
+To use the library with MATLAB or the included examples, you need to make sure the EnsightLib library can be found.  For this, you can either build the library as described above and copy it to a location in the global library search path, or use it from a local directory by specifying the `LD_LIBRARY_PATH` environment variable (Linux systems). For example, if the path to your compiled library is `/home/USER/Ensight4Matlab/ensight_lib/lib/libEnsightLib.so`, you would set the following:
 ```bash
 > export LD_LIBRARY_PATH=/home/USER/Ensight4Matlab/ensight_lib/lib/:${LD_LIBRARY_PATH}
 ```
+You can add this line to your `.bashrc` file to automatically run it.
+
+If you don't install the library and also don't add set the appropriate `LD_LIBRARY_PATH`, the system won't be able to find the library, resulting in an error message similar to:
+
+```bash
+user:~/Ensight4Matlab/ensight_lib/examples/ensight_viewer> ./ensight_viewer
+./ensight_viewer: error while loading shared libraries:
+libEnsightLib.so.1: cannot open shared object file: No such file or directory
+```
+
+Building the MATLAB interface
+-----------------------------
+To build the MATLAB interface, you need to make sure MATLAB can find the EnsightLib as described above, i.e. copy it to a global library location or set the `LD_LIBRARY_PATH` environment variable.
 This needs to be set before you start MATLAB.
 
 Building the MATLAB interface is aided by two scripts: `SETUP.m` and `runmex.m`. In MATLAB, navigate to the `EnsightMatlab` directory containing these scripts, then run `SETUP` first followed by `runmex`.
@@ -108,7 +122,7 @@ On the filesystem, a data set consists of several files:
 C++ Usage
 ---------
 
-The directory `ensight_lib/examples/ensight_viewer` contains a demo application for the C++ library. This application is a simple OpenGL-based viewer for EnSight files. It is build using the qmake build process the same way as the EnsightLib library, see build instructions [build instructions above](#building-the-ensightlib-c-library).
+The directory `ensight_lib/examples/ensight_viewer` contains a demo application for the C++ library. This application is a simple OpenGL-based viewer for EnSight files. It is build using the qmake build process the same way as the EnsightLib library, see build instructions [build instructions above](#building-the-ensightlib-c-library). To run the resulting application, you also need to [install the library as above.](#installing-the-library)
 
 Unpack the example data in `data/jet.tar.bz2` and load it in the viewer demo. You can see that the data consists of a several named parts, containing different types of cells (quadrangles, hexahedra), and several variables such as "temperature" and "velocity".
 
