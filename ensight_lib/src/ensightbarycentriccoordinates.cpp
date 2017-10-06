@@ -227,25 +227,20 @@ void EnsightBarycentricCoordinates::computeTetraCell(const Vec3& pos,
 {
     const Veci& iNodes = cell->getCell();
 
-    // Vertices of the tetrahedron
-    Vec3 v0 = cell->getVertex(iNodes(iLocalSubNodes(0)));
-    Vec3 v1 = cell->getVertex(iNodes(iLocalSubNodes(1)));
-    Vec3 v2 = cell->getVertex(iNodes(iLocalSubNodes(2)));
-    Vec3 v3 = cell->getVertex(iNodes(iLocalSubNodes(3)));
+    Vec3 a = cell->getVertex(iNodes(iLocalSubNodes(0)));
+    Vec3 b = cell->getVertex(iNodes(iLocalSubNodes(1)));
+    Vec3 c = cell->getVertex(iNodes(iLocalSubNodes(2)));
 
-    Vec3 q2 = v1 - v0;
-    Vec3 q3 = v2 - v0;
-    Vec3 q4 = v3 - v0;
+    Vec3 v0 = pos - c;
+    Vec3 v1 = a - c;
+    Vec3 v2 = b - c;
 
-    double det = q2.dot(q3.cross(q4));
+    double det = v2(1)*v1(0) - v2(0)*v1(1);
 
-    baryCoords_(iLocalSubNodes(1)) = (pos-v0).dot((q3.cross(q4)) / det);
-    baryCoords_(iLocalSubNodes(2)) = (pos-v0).dot((q4.cross(q2)) / det);
-    baryCoords_(iLocalSubNodes(3)) = (pos-v0).dot((q2.cross(q3)) / det);
-
-    baryCoords_(iLocalSubNodes(0)) = 1.0 - baryCoords_(iLocalSubNodes(1))
-                                         - baryCoords_(iLocalSubNodes(2))
-                                         - baryCoords_(iLocalSubNodes(3));
+    baryCoords_(iLocalSubNodes(0)) =  (v2(1)*v0(0) - v2(0)*v0(1)) / det;
+    baryCoords_(iLocalSubNodes(1)) =  (v1(0)*v0(1) - v1(1)*v0(0))/ det;
+    baryCoords_(iLocalSubNodes(2)) = 1.0 - baryCoords_(iLocalSubNodes(0))
+                                         - baryCoords_(iLocalSubNodes(1));
 }
 
 void EnsightBarycentricCoordinates::computePyramidCell(const Vec3& pos,
