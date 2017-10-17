@@ -1,0 +1,9 @@
+FORMAT
+type:      ensight gold
+
+GEOMETRY
+model:           write_example_binary.geo
+
+VARIABLE
+scalar per node:                      wave                write_example_binary.wave
+
