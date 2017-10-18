@@ -1,0 +1,19 @@
+#################################################################################################
+# 												#
+# Test file for EnsightReaderTests::QStringRead_OutofBoundsTimestepRequest_ReturnsNullptr_data()#
+#												#
+# Case: SecondSubPredicateIsTransientFalse                                                      #
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+GEOMETRY
+model: notRelevantInThisTest.geo
+TIME
+time set: 1
+#
+# number of steps = 1 leads to caseFile.timesteps.rows() > 1 being false and 
+# therefore isTransient turning false
+#
+number of steps: 1 
+time values: 1.0

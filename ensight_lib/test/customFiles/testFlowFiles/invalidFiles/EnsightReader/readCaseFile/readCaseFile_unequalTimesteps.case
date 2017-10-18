@@ -1,0 +1,13 @@
+#################################################################################################
+#												#
+# Test file for EnsightReaderTests::ReadCaseFile_UnequalTimesteps				#
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+FILE
+#
+# (file set)	!= (number of steps) to trigger error event
+#     1		!=	   2
+file set:  1
+number of steps:  2

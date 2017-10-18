@@ -1,0 +1,18 @@
+#################################################################################################
+#												#
+# Testfile for EnsightReaderTests::UnableToCreateVariable					#
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+GEOMETRY
+# 	ASCII.geo contains an invalid file header and therefore triggers an error event on
+# 	variable creation (EnsightASCIIReader::readAsciiGeometry())
+model: ASCII.geo
+VARIABLE
+#
+#	As a backup, intentional duplicate variable to trigger error event on variable creation
+#
+scalar per node: density                                          jet.scl1
+scalar per node: density                                          jet.scl1
+

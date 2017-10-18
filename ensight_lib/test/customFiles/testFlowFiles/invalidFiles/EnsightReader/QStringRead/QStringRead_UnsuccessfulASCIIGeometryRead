@@ -1,0 +1,20 @@
+#################################################################################################
+#												#
+# Testfile for EnsightReaderTests::UnsuccessfulASCIIGeometryRead				#
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+GEOMETRY
+model: ASCII.geo
+TIME
+time set: 1
+number of steps: 3 
+time values: 1.0 4.0 5.0
+#
+# File section added to set isTransientSingleFile to true,
+# thereby skipping wildcards error
+#
+FILE
+file set: 1
+number of steps: 2

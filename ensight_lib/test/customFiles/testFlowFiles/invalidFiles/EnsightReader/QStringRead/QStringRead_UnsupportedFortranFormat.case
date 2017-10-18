@@ -1,0 +1,21 @@
+#################################################################################################
+#												#
+# Testfile for EnsightReaderTests::QStringRead_UnsupportedFortranFormat				#
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+GEOMETRY
+model: FORTRAN.geo
+TIME
+time set: 1
+number of steps: 2 
+time values: 1.0 4.0
+#
+# File section added to set isTransientSingleFile to true,
+# thereby skipping wildcards error
+#
+FILE
+file set: 1
+number of steps: 2
+

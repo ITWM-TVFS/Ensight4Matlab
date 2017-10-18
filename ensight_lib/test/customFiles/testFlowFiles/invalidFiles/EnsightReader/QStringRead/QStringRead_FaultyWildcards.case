@@ -1,0 +1,13 @@
+#################################################################################################
+#												# 
+# Test file for EnsightReaderTests::QStringRead_FaultyWildcards					#
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+GEOMETRY
+model: QStringRead_FaultyWildcards.geo
+TIME
+time set: 1
+number of steps: 2 
+time values: 1.0 3.0

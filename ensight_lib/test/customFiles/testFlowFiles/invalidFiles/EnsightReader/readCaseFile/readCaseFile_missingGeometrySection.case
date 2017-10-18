@@ -1,0 +1,10 @@
+#################################################################################################
+# 												#
+# Test file for EnsightReaderTests::ReadCaseFile_MissingGeometrySection				#
+#												#
+#################################################################################################
+FORMAT
+type:  ensight gold
+#
+# GEOMETRY section intentionally ommited to trigger error event
+#
