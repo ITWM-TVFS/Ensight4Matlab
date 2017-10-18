@@ -14,6 +14,7 @@ Table of Contents
     * [Requirements](#requirements)
     * [Building the EnsightLib C++ library](#building-the-ensightlib-c-library)
     * [Installing the library](#installing-the-library)
+    * [Running tests](#running-tests)
     * [Building the MATLAB interface](#building-the-matlab-interface)
   * [Usage](#usage)
     * [Overview](#overview)
@@ -79,6 +80,13 @@ user:~/Ensight4Matlab/ensight_lib/examples/ensight_viewer> ./ensight_viewer
 libEnsightLib.so.1: cannot open shared object file: No such file or directory
 ```
 
+Running tests
+-------------
+Once you've set up your system to find the library, you can run some tests contained in directory `ensight_lib/test`, which you can compile the same way with `qmake` and `make` as above. Before you run the tests, you also need to have unpacked the example data in `data/jet.tar.bz2`.
+
+You can also run the small [examples](#c-usage) located in `ensight_lib/examples` and compare the output produced by the `write_file` example to the reference output (`ensight_lib/examples/data`).
+
+
 Building the MATLAB interface
 -----------------------------
 To build the MATLAB interface, you need to make sure MATLAB can find the EnsightLib as described above, i.e. copy it to a global library location or set the `LD_LIBRARY_PATH` environment variable.
@@ -122,6 +130,13 @@ On the filesystem, a data set consists of several files:
 C++ Usage
 ---------
 
+Examples for using the library with C++ are located in `ensight_lib/examples`. The directory contains several short command line examples as well as a GUI demo application. The command line examples demonstrate how to
+ * read and print information about a data set
+ * interpolate a variable in a data set
+ * create a data set with one part and one variable, and write the data to a file.
+ 
+In addition to running the [tests](#running-tests), you can also verify that the output produced by the `write_file` example is identical to the reference data by using the `diff` command. For a screenshot how the resulting file looks when loading in the viewer application, see Figure 3 below.
+
 The directory `ensight_lib/examples/ensight_viewer` contains a demo application for the C++ library. This application is a simple OpenGL-based viewer for EnSight files. It is build using the qmake build process the same way as the EnsightLib library, see build instructions [build instructions above](#building-the-ensightlib-c-library). To run the resulting application, you also need to [install the library as above.](#installing-the-library)
 
 Unpack the example data in `data/jet.tar.bz2` and load it in the viewer demo. You can see that the data consists of a several named parts, containing different types of cells (quadrangles, hexahedra), and several variables such as "temperature" and "velocity".
@@ -135,6 +150,12 @@ Figure 2: A zoomed view of the "temperature" variable in wireframe mode.</div>
 In the main window (left) you can select a representation mode, and either coloring according to a variable or solid color. For data sets consisting of multiple time steps, you can also select which time step to display. The provided example data set is static, i.e. contains only a single time step.
 
 The displayed table details the structure of the data set. For each part, there are two lines, one for the currently selected time step and one for the data in all time steps. The different columns describe the bounding box of the part, whether it is displayed in the viewer ("active"), how many vertices it contains, as well as which types of cells it contains. Also, there is a colum for each variable containing the min and max values of the variable in this part.
+
+You can also use the viewer to load the result of the `write_file` example, which produces a simple rectangular grid. The result should look like this:
+
+<div align=center>
+<img src="images/write_example_result_in_viewer.png"><br>
+Figure 3: Output of write_file example loaded in the Ensight Viewer Demo.</div>
 
 -------
 
