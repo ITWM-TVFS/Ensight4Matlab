@@ -1,8 +1,8 @@
 #include "ensightreadertests.h"
 
+#include <QFileInfo>
 #include "ensightpart.h"
-
-#include <ensightvariable.h>
+#include "ensightvariable.h"
 
 void EnsightReaderTests::init()
 {
@@ -71,6 +71,12 @@ void EnsightReaderTests::StdStringArgumentConstructor_ParameterValueAssignment_C
 void EnsightReaderTests::ReadCaseFile_SuccessfulCaseFileRead_CaseFileCorrectlyParsed()
 {
     QString argString = relativeValidFlowFilePath_;
+
+    if (!QFileInfo(argString).exists())
+    {
+        QWARN(QString("File '%1' not found.\nTests will fail!")
+                  .arg(argString).toLocal8Bit().constData());
+    }
 
     testEnsightCase.setMasterFileName(argString);
 
@@ -313,6 +319,12 @@ void EnsightReaderTests::GetFileNumberForStep_Predicade_ReturnsCorrectly_data()
 void EnsightReaderTests::QStringRead_SuccessfulCaseFileRead_CaseFileCorrectylParsed()
 {
     QString argString = relativeValidFlowFilePath_;
+
+    if (!QFileInfo(argString).exists())
+    {
+        QWARN(QString("File '%1' not found.\nTests will fail!")
+                  .arg(argString).toLocal8Bit().constData());
+    }
 
     std::unique_ptr<EnsightObj> createdEnsightObj{Ensight::Reader::read(argString,0)};
 
