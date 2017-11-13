@@ -34,7 +34,7 @@ Requirements
 ------------
 
 The C++ library has dependencies on the following third party libraries:
-  * Eigen (version >= 3.2): A fast, header-only library for linear algebra, available at http://eigen.tuxfamily.org/
+  * Eigen (version >= 3.2): A fast, header-only library for linear algebra, available at http://eigen.tuxfamily.org/. It should also be directly available from your distribution as package `eigen3`.
   * Qt, either version 4 or 5.
 
   For use with MATLAB, Qt 4 is recommended. (see below)
@@ -47,17 +47,24 @@ MATLAB ships with its own Qt 5 library which may be a different minor version th
 
 Building the EnsightLib C++ library
 -----------------------------------
-The EnsightLib library uses the Qt qmake build system. From the directory `ensight_lib` first run qmake to create a Makefile, then run make.
+The EnsightLib library uses the Qt qmake build system. The library itself can be compiled alone, or also with test and example files. The easiest way to build everything at once is to run qmake on the file `EnsightLibAndTests.pro` in the project's root directory to create a Makefile, then run make.
 ```bash
+> qmake-qt4 EnsightLibAndTests.pro
+> make
+```
+Alternatively, you can compile just the library itself:
+From the directory `ensight_lib` first run qmake on `EnsightLib.pro`, then run make.
+```bash
+> cd ensight_lib
 > qmake-qt4 EnsightLib.pro
 > make
 ```
-This will create a file `libEnsightLib.so` in `ensight_lib/lib` (or a dll on Windows). The qmake-based Makefile does not create a target for `make install`, so you have to manually copy or link the .so file to e.g. `/usr/lib` if you want to make it globally accessible on your machine.
+In both cases, this will create a file `libEnsightLib.so` in `ensight_lib/lib` (or a dll on Windows). The qmake-based Makefile does not create a target for `make install`, so you have to manually copy or link the .so file to e.g. `/usr/lib` if you want to make it globally accessible on your machine.
 
-If you use a locally installed version of the Eigen library, you have to edit the include path defined in EnsightLib.pro. The corresponding line is:
+If you use a locally installed version of the Eigen library, you have to edit the include path defined in `ensight_lib/EnsightLibConfig.pri`. The corresponding line is:
 ```
 # Include path to Eigen library: must contain the directory "Eigen/Dense"
-INCLUDEPATH += /usr/local/include
+INCLUDEPATH += /usr/include/eigen3
 ```
 You can also edit the .pro file to compile a static library (instead of an .so) by uncommenting the config option:
 ```
@@ -70,7 +77,7 @@ To use the library with MATLAB or the included examples, you need to make sure t
 ```bash
 > export LD_LIBRARY_PATH=/home/USER/Ensight4Matlab/ensight_lib/lib/:${LD_LIBRARY_PATH}
 ```
-You can add this line to your `.bashrc` file to automatically run it.
+You can add this line to your `.bashrc` file to run it automatically.
 
 If you don't install the library and also don't add set the appropriate `LD_LIBRARY_PATH`, the system won't be able to find the library, resulting in an error message similar to:
 
@@ -82,7 +89,11 @@ libEnsightLib.so.1: cannot open shared object file: No such file or directory
 
 Running tests
 -------------
-Once you've set up your system to find the library, you can run some tests contained in directory `ensight_lib/test`, which you can compile the same way with `qmake` and `make` as above. Before you run the tests, you also need to have unpacked the example data in `data/jet.tar.bz2`.
+Once you've set up your system to find the library, you can run some tests contained in directory `ensight_lib/test`. They are automatically build along the library if you built `EnsightLibAndTests.pro`, otherwise you can individually compile the same way with `qmake-qt4 EnsightLibTest.pro` and `make` as above. This will create a binary `EnsightLibTest` in the corresponding directory `test`. Before you run the tests, you also need to have unpacked the example data in `data/jet.tar.bz2`:
+```bash
+> cd data
+> tar -xf jet.tar.bz2
+```
 
 You can also run the small [examples](#c-usage) located in `ensight_lib/examples` and compare the output produced by the `write_file` example to the reference output (`ensight_lib/examples/data`).
 
@@ -97,7 +108,7 @@ Building the MATLAB interface is aided by two scripts: `SETUP.m` and `runmex.m`.
 The SETUP script will ask you to specify several include and library paths. These paths refer to:
   * QT_INCLUDE_PATH: The include files for Qt, e.g. `/usr/include`
   * QT_LIB_PATH: The Qt libraries, e.g. `/usr/lib64`
-  * EIGEN_PATH: The Eigen library. Same as used in your EnsightLib.pro
+  * EIGEN_PATH: The Eigen library. Same as used in your EnsightLibConfig.pri
   * ENSIGHT_INCLUDE_PATH: The includes for the EnsightLib library, e.g. `../ensight_lib/include`
   * ENSIGHT_LIB_PATH: The path to your compiled EnsightLib library, same as specified in `LD_LIBRARY_PATH` above
 
@@ -139,7 +150,12 @@ In addition to running the [tests](#running-tests), you can also verify that the
 
 The directory `ensight_lib/examples/ensight_viewer` contains a demo application for the C++ library. This application is a simple OpenGL-based viewer for EnSight files. It is build using the qmake build process the same way as the EnsightLib library, see build instructions [build instructions above](#building-the-ensightlib-c-library). To run the resulting application, you also need to [install the library as above.](#installing-the-library)
 
-Unpack the example data in `data/jet.tar.bz2` and load it in the viewer demo. You can see that the data consists of a several named parts, containing different types of cells (quadrangles, hexahedra), and several variables such as "temperature" and "velocity".
+If you have not done already, unpack the example data in `data/jet.tar.bz2`
+```bash
+> cd data
+> tar -xf jet.tar.bz2
+```
+and load it in the viewer demo. You can see that the data consists of a several named parts, containing different types of cells (quadrangles, hexahedra), and several variables such as "temperature" and "velocity".
 
 ![Screenshot of Ensight Viewer Demo](images/ensightviewer_scr1.png)
 <div align=center>Figure 1: The Ensight Viewer demo shows the structure of the example data file (left) and a visualization of the "velocity" variable of all parts selected as "active" (right).</div>
