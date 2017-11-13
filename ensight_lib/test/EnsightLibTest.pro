@@ -3,18 +3,16 @@ QT -= gui
 
 TARGET = EnsightLibTest
 
-# Include path to Eigen library: must contain the directory "Eigen/Dense"
-INCLUDEPATH += /usr/local/include
-INCLUDEPATH += /usr/include/eigen3
-
-INCLUDEPATH *= ../../../libs/3dparty/eigen_v3_2_1
-
 # Include path to Ensight lib
 INCLUDEPATH += ../include
 LIBS *= -L../lib -lEnsightLib
 
+# Configuration file for the include directories
+!include(../EnsightLibConfig.pri) {
+    error("Cannot find include file '../EnsightLibConfig.pri'")
+}
 
-DESTDIR = build
+#DESTDIR = build
 OBJECTS_DIR = build/.obj
 MOC_DIR = build/.moc
 RCC_DIR = build/.rcc

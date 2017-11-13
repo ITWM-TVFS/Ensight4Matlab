@@ -20,10 +20,10 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     }
 }
 
-
-# Include path to Eigen library: must contain the directory "Eigen/Dense"
-INCLUDEPATH += /usr/local/include
-INCLUDEPATH += /usr/include/eigen3
+# Configuration file for the include directories
+!include(EnsightLibConfig.pri) {
+    error("Cannot find include file 'EnsightLibConfig.pri'")
+}
 
 
 DESTDIR = lib

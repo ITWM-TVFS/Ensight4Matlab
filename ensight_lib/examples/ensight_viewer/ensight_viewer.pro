@@ -3,13 +3,13 @@ QT += core gui opengl
 TARGET = ensight_viewer
 TEMPLATE = app
 
-# Include path to Eigen library: must contain the directory "Eigen/Dense"
-INCLUDEPATH += /usr/local/include
-INCLUDEPATH += /usr/include/eigen3
-
-
 # Include path to Ensight lib
 INCLUDEPATH += ../../include
+
+# Configuration file for the include directories
+!include(../../EnsightLibConfig.pri) {
+    error("Cannot find include file '../../EnsightLibConfig.pri'")
+}
 
 unix {
     QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pedantic

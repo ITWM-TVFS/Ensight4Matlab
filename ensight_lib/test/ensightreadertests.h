@@ -90,10 +90,10 @@ private:
     EnsightCase testEnsightCase;
 
     QString relativeValidFlowFilePath_
-    {"../customFiles/testFlowFiles/validFiles/jet.case"};
+    {"customFiles/testFlowFiles/validFiles/jet.case"};
 
     QString relativeInvalidFilesDirPath_
-    {"../customFiles/testFlowFiles/invalidFiles/EnsightReader/"};
+    {"customFiles/testFlowFiles/invalidFiles/EnsightReader/"};
 
 };
 

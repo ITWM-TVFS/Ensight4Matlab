@@ -4,17 +4,17 @@ QT -= gui
 TARGET = interpolate_variable
 TEMPLATE = app
 
-# Include path to Eigen library: must contain the directory "Eigen/Dense"
-INCLUDEPATH += /usr/local/include
-INCLUDEPATH += /usr/include/eigen3
-
 # Include path to Ensight lib
 INCLUDEPATH += ../../include
+LIBS += -L../../lib/ -lEnsightLib
+
+# Configuration file for the include directories
+!include(../../EnsightLibConfig.pri) {
+    error("Cannot find include file '../../EnsightLibConfig.pri'")
+}
 
 unix {
     QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pedantic
 }
-
-LIBS += -L../../lib/ -lEnsightLib
 
 SOURCES += main.cpp
