@@ -22,6 +22,8 @@ Table of Contents
     * [MATLAB Usage](#matlab-usage)
     * [Point location and variable interpolation](#point-location-and-variable-interpolation)
   * [License](#license)
+  * [Getting support](#getting-support)
+  * [Contributing](#contributing)
   * [Contributors](#contributors)
 
 
@@ -286,7 +288,14 @@ MATLAB is a registered trademark of The MathWorks, Inc. (see www.mathworks.com/t
 
 This package is an independent project and in no way affiliated with The MathWorks, Inc. or Computational Engineering International, Inc. All trademarks are property of their respective owners.
 
+Getting support
+===============
+For now, you can ask for help by [mail](mailto:andre{dot}schmeisser{at}itwm{dot}fraunhofer.de). A chat forum for support / FAQs could be set up if the need arises.
+
+Contributing
+============
+See [CONTRIBUTING](CONTRIBUTING.md)
+
 Contributors
 ============
-
 Andre Schmeißer, Daniel Burkhart, Dominik Linn, Johannes Schnebele, Manuel Ettmüller, Simone Gramsch, Walter Arne
