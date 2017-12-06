@@ -44,8 +44,6 @@ This packages provides a C++ based library to process e.g. CFD data sets in EnSi
 
 We have extensively used this library to integrate our own simulations of fiber dynamics (e.g. [@gramsch2014simulation]) with CFD data computed by the commercial CFD solver ANSYS&reg; Fluent [@ANSYSFluent].
 
-Repository: https://github.com/ITWM-TVFS/Ensight4Matlab
-
 
 # References
 
