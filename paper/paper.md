@@ -1,5 +1,5 @@
 ---
-title: 'Ensight4Matlab: let's you read, process, and write files in EnSight® Gold format from your C++ or MATLAB® code.'
+title: "Ensight4Matlab: let's you read, process, and write files in EnSight® Gold format from your C++ or MATLAB® code."
 tags:
   - Data import
   - Ensight Gold
@@ -12,6 +12,7 @@ authors:
    orcid: 0000-0002-4400-9635
    affiliation: 1
  - name: Daniel Burkhardt
+   affiliation: 2
  - name: Dominik Linn
    affiliation: 1
  - name: Johannes Schnebele
@@ -27,6 +28,8 @@ authors:
 affiliations:
  - name: Fraunhofer Institute for Industrial Mathematics ITWM, Kaiserslautern, Germany
    index: 1
+ - name: ITK Engineering GmbH, Germany
+   index: 2
 date: 15 March 2017
 bibliography: paper.bib
 ---
