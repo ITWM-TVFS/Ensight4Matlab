@@ -1,4 +1,46 @@
 /*
+ * This file contains code to display and interact with a 3d scene. Some parts
+ * of the file are adapted from code originally found in OpenMesh, which is
+ * under the LGPL license. Thus, this file is covered by the LGPL.
+ *
+ * Additionally, the changes from the original code can be used under the less
+ * restrictive MIT license, if desired, as stated by the copyright notice below.
+ */
+
+
+/*===========================================================================*\
+ *                                                                           *
+ *                               OpenMesh                                    *
+ *      Copyright (C) 2001-2015 by Computer Graphics Group, RWTH Aachen      *
+ *                           www.openmesh.org                                *
+ *                                                                           *
+ *  OpenMesh is free software: you can redistribute it and/or modify         *
+ *  it under the terms of the GNU Lesser General Public License as           *
+ *  published by the Free Software Foundation, either version 3 of           *
+ *  the License, or (at your option) any later version with the              *
+ *  following exceptions:                                                    *
+ *                                                                           *
+ *  If other files instantiate templates or use macros                       *
+ *  or inline functions from this file, or you compile this file and         *
+ *  link it with other files to produce an executable, this file does        *
+ *  not by itself cause the resulting executable to be covered by the        *
+ *  GNU Lesser General Public License. This exception does not however       *
+ *  invalidate any other reasons why the executable file might be            *
+ *  covered by the GNU Lesser General Public License.                        *
+ *                                                                           *
+ *  OpenMesh is distributed in the hope that it will be useful,              *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ *  GNU Lesser General Public License for more details.                      *
+ *                                                                           *
+ *  You should have received a copy of the GNU LesserGeneral Public          *
+ *  License along with OpenMesh.  If not,                                    *
+ *  see <http://www.gnu.org/licenses/>.                                      *
+ *                                                                           *
+\*===========================================================================*/
+
+
+/*
  * Copyright (c) 2016 Fraunhofer ITWM
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,6 +79,7 @@
 /**
  * @brief The GLWidget class is an extension of the Qt QGLWidget.
  * @author Daniel Burkhart, Andre Schmeißer - Fraunhofer ITWM
+ * @author original implementation of ArcBall code adapted from OpenMesh
  *
  * The GLWidget class enhances the QT QGLWidget:
  * - Mouse interaction (Trackball rotation, zooming and translation)

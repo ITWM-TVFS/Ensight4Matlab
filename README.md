@@ -283,6 +283,8 @@ This package is copyright &copy; Fraunhofer ITWM and licensed under the MIT Lice
 
 The MATLAB wrapper uses the third party file "[class_handle.hpp](EnsightMatlab/mexfiles/class_handle.hpp)", which is copyright &copy; 2012, Oliver Woodford, and licensed under the 2-Clause BSD [License](EnsightMatlab/mexfiles/LICENSE.txt).
 
+The GUI viewer example uses small parts of code from [OpenMesh](https://www.openmesh.org) for the [visualization widget](ensight_lib/examples/ensight_viewer/glwidget.h), covered under the [LGPL](ensight_lib/examples/ensight_viewer/lgpl-3.0.md). This affects the example application only.
+
 MATLAB is a registered trademark of The MathWorks, Inc. (see www.mathworks.com/trademarks). Ensight is a trademark of Computational Engineering International, Inc.
 
 
