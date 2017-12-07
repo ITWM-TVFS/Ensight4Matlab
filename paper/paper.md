@@ -1,5 +1,5 @@
 ---
-title: "Ensight4Matlab: let's you read, process, and write files in EnSight® Gold format from your C++ or MATLAB® code."
+title: "Ensight4Matlab: read, process, and write files in EnSight® Gold format from C++ or MATLAB® code."
 tags:
   - Data import
   - Ensight Gold
