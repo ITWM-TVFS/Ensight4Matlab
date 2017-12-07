@@ -11,7 +11,7 @@ authors:
  - name: Andre Schmeißer
    orcid: 0000-0002-4400-9635
    affiliation: 1
- - name: Daniel Burkhardt
+ - name: Daniel Burkhart
    affiliation: 2
  - name: Dominik Linn
    affiliation: 1
