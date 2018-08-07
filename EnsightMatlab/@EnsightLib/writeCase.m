@@ -22,12 +22,12 @@ function writeCase(varargin)
 
     if nargin<3
         assert(~this.isTransient(),'EnsightLib::writeCase - Object is not static.');
-        timestep = 0;
+        timestep = -1;
     else
         timestep = varargin{3};
     end
     
-    assert(this.verifyTimestep(timestep),'EnsightLib::writeCase - Invalid timestep.');
+    % assert(this.verifyTimestep(timestep),'EnsightLib::writeCase - Invalid timestep.');
     
     valueArray = [4, 0, 5, 1, 0, 0];
     EnsightLib_interface('obj', 'write', valueArray, this.getObjectHandle(), filename, 0, timestep);
