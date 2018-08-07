@@ -19,10 +19,12 @@
 %%
 function setCells(this, part, cells, celltype, timestep)
 
-    if(nargin <5 && this.isTransient)
-        error('EnsightLib::setCells - Object is not static. Timestep required.');
-    else
-        timestep = 0;
+    if (nargin <5)
+        if (this.isTransient)
+            error('EnsightLib::setCells - Object is not static. Timestep required.');
+        else
+            timestep = 0;
+        end
     end
     
     % Determine part_id
